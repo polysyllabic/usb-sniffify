@@ -62,33 +62,16 @@ void process_eps_info(EndpointZeroInfo* epZeroInfo) {
   
   int num = usb_raw_eps_info(epZeroInfo->fd, &info);
   for (int i = 0; i < num; i++) {
-    PLOG_VERBOSE << "ep #" << i << ":";
-    // printf("ep #%d:\n", i);
-    PLOG_VERBOSE << "  name: " << &info.eps[i].name[0];
-    // printf("  name: %s\n", &info.eps[i].name[0]);
-    printf("  addr: %u\n", info.eps[i].addr);
-    printf("  type: %s %s %s\n",
-         info.eps[i].caps.type_iso ? "iso" : "___",
-         info.eps[i].caps.type_bulk ? "blk" : "___",
-         info.eps[i].caps.type_int ? "int" : "___");
-    printf("  dir : %s %s\n",
-         info.eps[i].caps.dir_in ? "in " : "___",
-         info.eps[i].caps.dir_out ? "out" : "___");
-    printf("  maxpacket_limit: %u\n",
-         info.eps[i].limits.maxpacket_limit);
-    printf("  max_streams: %u\n", info.eps[i].limits.max_streams);
+    PLOG_VERBOSE << "ep #" << i << ":  name: " << &info.eps[i].name[0] << "  addr: " << info.eps[i].addr;
+    PLOG_VERBOSE << "  type: " << (info.eps[i].caps.type_iso ? "iso " : "___ ") <<
+         (info.eps[i].caps.type_bulk ? "blk " : "___ ") <<
+         (info.eps[i].caps.type_int ? "int " : "___ ");
+    PLOG_VERBOSE << "  dir : " << (info.eps[i].caps.dir_in ? "in  " : "___ ") <<
+         (info.eps[i].caps.dir_out ? "out " : "___ ");
+    PLOG_VERBOSE << "  maxpacket_limit: " << info.eps[i].limits.maxpacket_limit;
+    PLOG_VERBOSE << "  max_streams: " << info.eps[i].limits.max_streams;
   }
   
-//  for (int e = 0; e < epZeroInfo->totalEndpoints; e++) {
-//    for (int i = 0; i < num; i++) {
-//      if (assign_ep_address(&info.eps[i], &epZeroInfo->mEndpointInfos[e].usb_endpoint))
-//        continue;
-//    }
-//
-//    int int_in_addr = usb_endpoint_num(&epZeroInfo->mEndpointInfos[e].usb_endpoint);
-//    assert(int_in_addr != 0);
-//    printf("int_in: addr = %u\n", int_in_addr);
-//  }
   for (int c = 0; c < epZeroInfo->bNumConfigurations; c++) {
     ConfigurationInfo* cInfo = &epZeroInfo->mConfigurationInfos[c];
     for (int i = 0; i < cInfo->bNumInterfaces; i++) {
@@ -104,7 +87,7 @@ void process_eps_info(EndpointZeroInfo* epZeroInfo) {
 
           int int_in_addr = usb_endpoint_num(&eInfo->usb_endpoint);
           assert(int_in_addr != 0);
-          printf("int_in: addr = %u\n", int_in_addr);
+          PLOG_VERBOSE << "int_in: addr = " << int_in_addr;
         }
       }
     }
@@ -194,7 +177,6 @@ int usb_raw_ep_read(int fd, struct usb_raw_ep_io *io) {
     if(errno == ETIMEDOUT ) {
       return rv;
     }
-    //printf("Error = %d\n ", rv);
     perror("ioctl(USB_RAW_IOCTL_EP_READ)");
     exit(EXIT_FAILURE);
   }
@@ -207,7 +189,6 @@ int usb_raw_ep_write(int fd, struct usb_raw_ep_io *io) {
     if(errno == ETIMEDOUT ) {
       return rv;
     }
-    //printf("Error = %d\n ", rv);
     perror("ioctl(USB_RAW_IOCTL_EP_WRITE)");
     exit(EXIT_FAILURE);
   }
@@ -261,20 +242,20 @@ void usb_raw_ep_set_halt(int fd, int ep) {
 void log_control_request(struct usb_ctrlrequest *ctrl) {
   PLOG_VERBOSE << "bRequestType: " << ctrl->bRequestType << " (" <<
     ((ctrl->bRequestType & USB_DIR_IN) ? "IN" : "OUT") << "), bRequest: 0x" << ctrl->bRequest
-      << ", wValue: 0x" << ctrl->wValue << ", wIndex: 0x" << ctrl->wIndex
-      << ", wLength: " << ctrl->wLength;
+      << ", wValue: 0x" << std::hex << ctrl->wValue << ", wIndex: 0x" << ctrl->wIndex
+      << ", wLength: " << std::dec << ctrl->wLength;
   switch (ctrl->bRequestType & USB_TYPE_MASK) {
     case USB_TYPE_STANDARD:
-      printf("  type = USB_TYPE_STANDARD\n");
+      PLOG_VERBOSE << "  type = USB_TYPE_STANDARD";
       break;
     case USB_TYPE_CLASS:
-      printf("  type = USB_TYPE_CLASS\n");
+      PLOG_VERBOSE << "  type = USB_TYPE_CLASS";
       break;
     case USB_TYPE_VENDOR:
-      printf("  type = USB_TYPE_VENDOR\n");
+      PLOG_VERBOSE << "  type = USB_TYPE_VENDOR";
       break;
     default:
-      printf("  type = unknown = %d\n", (int)ctrl->bRequestType);
+      PLOG_VERBOSE << "  type = unknown = " << (int) ctrl->bRequestType;
       break;
   }
   
@@ -282,133 +263,132 @@ void log_control_request(struct usb_ctrlrequest *ctrl) {
     case USB_TYPE_STANDARD:
       switch (ctrl->bRequest) {
         case USB_REQ_GET_DESCRIPTOR:
-          printf("  req = USB_REQ_GET_DESCRIPTOR\n");
+          PLOG_VERBOSE << "  req = USB_REQ_GET_DESCRIPTOR";
           switch (ctrl->wValue >> 8) {
             case USB_DT_DEVICE:
-              printf("  desc = USB_DT_DEVICE\n");
+              PLOG_VERBOSE << "  desc = USB_DT_DEVICE";
               break;
             case USB_DT_CONFIG:
-              printf("  desc = USB_DT_CONFIG\n");
+              PLOG_VERBOSE << "  desc = USB_DT_CONFIG";
               break;
             case USB_DT_STRING:
-              printf("  desc = USB_DT_STRING\n");
+              PLOG_VERBOSE << "  desc = USB_DT_STRING";
               break;
             case USB_DT_INTERFACE:
-              printf("  desc = USB_DT_INTERFACE\n");
+              PLOG_VERBOSE << "  desc = USB_DT_INTERFACE";
               break;
             case USB_DT_ENDPOINT:
-              printf("  desc = USB_DT_ENDPOINT\n");
+              PLOG_VERBOSE << "  desc = USB_DT_ENDPOINT";
               break;
             case USB_DT_DEVICE_QUALIFIER:
-              printf("  desc = USB_DT_DEVICE_QUALIFIER\n");
+              PLOG_VERBOSE << "  desc = USB_DT_DEVICE_QUALIFIER";
               break;
             case USB_DT_OTHER_SPEED_CONFIG:
-              printf("  desc = USB_DT_OTHER_SPEED_CONFIG\n");
+              PLOG_VERBOSE << "  desc = USB_DT_OTHER_SPEED_CONFIG";
               break;
             case USB_DT_INTERFACE_POWER:
-              printf("  desc = USB_DT_INTERFACE_POWER\n");
+              PLOG_VERBOSE << "  desc = USB_DT_INTERFACE_POWER";
               break;
             case USB_DT_OTG:
-              printf("  desc = USB_DT_OTG\n");
+              PLOG_VERBOSE << "  desc = USB_DT_OTG";
               break;
             case USB_DT_DEBUG:
-              printf("  desc = USB_DT_DEBUG\n");
+              PLOG_VERBOSE << "  desc = USB_DT_DEBUG";
               break;
             case USB_DT_INTERFACE_ASSOCIATION:
-              printf("  desc = USB_DT_INTERFACE_ASSOCIATION\n");
+              PLOG_VERBOSE << "  desc = USB_DT_INTERFACE_ASSOCIATION";
               break;
             case USB_DT_SECURITY:
-              printf("  desc = USB_DT_SECURITY\n");
+              PLOG_VERBOSE << "  desc = USB_DT_SECURITY";
               break;
             case USB_DT_KEY:
-              printf("  desc = USB_DT_KEY\n");
+              PLOG_VERBOSE << "  desc = USB_DT_KEY";
               break;
             case USB_DT_ENCRYPTION_TYPE:
-              printf("  desc = USB_DT_ENCRYPTION_TYPE\n");
+              PLOG_VERBOSE << "  desc = USB_DT_ENCRYPTION_TYPE";
               break;
             case USB_DT_BOS:
-              printf("  desc = USB_DT_BOS\n");
+              PLOG_VERBOSE << "  desc = USB_DT_BOS";
               break;
             case USB_DT_DEVICE_CAPABILITY:
-              printf("  desc = USB_DT_DEVICE_CAPABILITY\n");
+              PLOG_VERBOSE << "  desc = USB_DT_DEVICE_CAPABILITY";
               break;
             case USB_DT_WIRELESS_ENDPOINT_COMP:
-              printf("  desc = USB_DT_WIRELESS_ENDPOINT_COMP\n");
+              PLOG_VERBOSE << "  desc = USB_DT_WIRELESS_ENDPOINT_COMP";
               break;
             case USB_DT_PIPE_USAGE:
-              printf("  desc = USB_DT_PIPE_USAGE\n");
+              PLOG_VERBOSE << "  desc = USB_DT_PIPE_USAGE";
               break;
             case USB_DT_SS_ENDPOINT_COMP:
-              printf("  desc = USB_DT_SS_ENDPOINT_COMP\n");
+              PLOG_VERBOSE << "  desc = USB_DT_SS_ENDPOINT_COMP";
               break;
             case HID_DT_HID:
-              printf("  descriptor = HID_DT_HID\n");
+              PLOG_VERBOSE << "  descriptor = HID_DT_HID";
               return;
             case HID_DT_REPORT:
-              printf("  descriptor = HID_DT_REPORT\n");
+              PLOG_VERBOSE << "  descriptor = HID_DT_REPORT";
               return;
             case HID_DT_PHYSICAL:
-              printf("  descriptor = HID_DT_PHYSICAL\n");
+              PLOG_VERBOSE << "  descriptor = HID_DT_PHYSICAL";
               return;
             default:
-              printf("  desc = unknown = 0x%x\n",
-                   ctrl->wValue >> 8);
+              PLOG_VERBOSE << "  desc = unknown = 0x" << std::hex << (ctrl->wValue >> 8) << std::dec;
               break;
           }
           break;
         case USB_REQ_SET_CONFIGURATION:
-          printf("  req = USB_REQ_SET_CONFIGURATION\n");
+          PLOG_VERBOSE << "  req = USB_REQ_SET_CONFIGURATION";
           break;
         case USB_REQ_GET_CONFIGURATION:
-          printf("  req = USB_REQ_GET_CONFIGURATION\n");
+          PLOG_VERBOSE << "  req = USB_REQ_GET_CONFIGURATION";
           break;
         case USB_REQ_SET_INTERFACE:
-          printf("  req = USB_REQ_SET_INTERFACE\n");
+          PLOG_VERBOSE << "  req = USB_REQ_SET_INTERFACE";
           break;
         case USB_REQ_GET_INTERFACE:
-          printf("  req = USB_REQ_GET_INTERFACE\n");
+          PLOG_VERBOSE << "  req = USB_REQ_GET_INTERFACE";
           break;
         case USB_REQ_GET_STATUS:
-          printf("  req = USB_REQ_GET_STATUS\n");
+          PLOG_VERBOSE << "  req = USB_REQ_GET_STATUS";
           break;
         case USB_REQ_CLEAR_FEATURE:
-          printf("  req = USB_REQ_CLEAR_FEATURE\n");
+          PLOG_VERBOSE << "  req = USB_REQ_CLEAR_FEATURE";
           break;
         case USB_REQ_SET_FEATURE:
-          printf("  req = USB_REQ_SET_FEATURE\n");
+          PLOG_VERBOSE << "  req = USB_REQ_SET_FEATURE";
           break;
         default:
-          printf("  req = unknown = 0x%x\n", ctrl->bRequest);
+          PLOG_VERBOSE << "  req = unknown = 0x" << std::hex << ctrl->bRequest << std::dec;
           break;
       }
       break;
     case USB_TYPE_CLASS:
       switch (ctrl->bRequest) {
         case HID_REQ_GET_REPORT:
-          printf("  req = HID_REQ_GET_REPORT\n");
+          PLOG_VERBOSE << "  req = HID_REQ_GET_REPORT";
           break;
         case HID_REQ_GET_IDLE:
-          printf("  req = HID_REQ_GET_IDLE\n");
+          PLOG_VERBOSE << "  req = HID_REQ_GET_IDLE";
           break;
         case HID_REQ_GET_PROTOCOL:
-          printf("  req = HID_REQ_GET_PROTOCOL\n");
+          PLOG_VERBOSE << "  req = HID_REQ_GET_PROTOCOL";
           break;
         case HID_REQ_SET_REPORT:
-          printf("  req = HID_REQ_SET_REPORT\n");
+          PLOG_VERBOSE << "  req = HID_REQ_SET_REPORT";
           break;
         case HID_REQ_SET_IDLE:
-          printf("  req = HID_REQ_SET_IDLE\n");
+          PLOG_VERBOSE << "  req = HID_REQ_SET_IDLE";
           break;
         case HID_REQ_SET_PROTOCOL:
-          printf("  req = HID_REQ_SET_PROTOCOL\n");
+          PLOG_VERBOSE << "  req = HID_REQ_SET_PROTOCOL";
           break;
         default:
-          printf("  req = unknown = 0x%x\n", ctrl->bRequest);
+          PLOG_VERBOSE << "  req = unknown = 0x" << std::hex << ctrl->bRequest << std::dec;
           break;
       }
       break;
     default:
-      printf("  req = unknown = 0x%x\n", ctrl->bRequest);
+      PLOG_VERBOSE << "  req = unknown = 0x" << std::hex << ctrl->bRequest << std::dec;
       break;
   }
 }
@@ -416,14 +396,14 @@ void log_control_request(struct usb_ctrlrequest *ctrl) {
 void log_event(struct usb_raw_event *event) {
   switch (event->type) {
   case USB_RAW_EVENT_CONNECT:
-    printf("event: connect, length: %u\n", event->length);
+    PLOG_VERBOSE << "event: connect, length: " << std::hex << event->length << std::dec;
     break;
   case USB_RAW_EVENT_CONTROL:
-    printf("event: control, length: %u\n", event->length);
+    PLOG_VERBOSE << "event: control, length: " << event->length;
     log_control_request((struct usb_ctrlrequest *)&event->data[0]);
     break;
   default:
-    printf("event: unknown, length: %u\n", event->length);
+    PLOG_VERBOSE << "event: unknown, length: " << event->length;
   }
 }
 

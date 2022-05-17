@@ -85,13 +85,13 @@ int RawGadgetPassthrough::initialize() {
   PLOG_VERBOSE << "Have Device Descriptor!";
   PLOG_VERBOSE << " - bLength            : " << deviceDescriptor.bLength;
   PLOG_VERBOSE << " - bDescriptorType    : " << deviceDescriptor.bDescriptorType;
-  PLOG_VERBOSE << " - bcdUSB             : " << std::setfill('0') << std::setw(2) << deviceDescriptor.bcdUSB;
+  PLOG_VERBOSE << " - bcdUSB             : " << std::hex << deviceDescriptor.bcdUSB;
   PLOG_VERBOSE << " - bDeviceClass       : " << deviceDescriptor.bDeviceClass;
   PLOG_VERBOSE << " - bDeviceSubClass    : " << deviceDescriptor.bDeviceSubClass;
   PLOG_VERBOSE << " - bDeviceProtocol    : " << deviceDescriptor.bDeviceProtocol;
   PLOG_VERBOSE << " - bMaxPacketSize0    : " << deviceDescriptor.bMaxPacketSize0;
-  PLOG_VERBOSE << " - idVendor           : " << std::setfill('0') << std::setw(2) << deviceDescriptor.idVendor;
-  PLOG_VERBOSE << " - idProduct          : " << std::setfill('0') << std::setw(2) << deviceDescriptor.idProduct;
+  PLOG_VERBOSE << " - idVendor           : " << std::hex << deviceDescriptor.idVendor;
+  PLOG_VERBOSE << " - idProduct          : " << std::hex << deviceDescriptor.idProduct;
   PLOG_VERBOSE << " - bcdDevice          : " << deviceDescriptor.bcdDevice;
   PLOG_VERBOSE << " - iManufacturer      : " << deviceDescriptor.iManufacturer;
   PLOG_VERBOSE << " - iProduct           : " << deviceDescriptor.iProduct;
@@ -191,7 +191,7 @@ int RawGadgetPassthrough::initialize() {
           
           //pthread_create(&endpointThreads[endpoint++], NULL, ep_loop_thread, endpointInfo);
           
-          PLOG_VERBOSE << "   | - bEndpointAddress   : " << std::setfill('0') << std::setw(2) << endpointDescriptor->bEndpointAddress;
+          PLOG_VERBOSE << "   | - bEndpointAddress   : " << std::hex << endpointDescriptor->bEndpointAddress;
           PLOG_VERBOSE << "     - wMaxPacketSize     : " << endpointDescriptor->wMaxPacketSize;
           PLOG_VERBOSE << "     - bmAttributes       : " <<  endpointDescriptor->bmAttributes;
           
@@ -223,7 +223,7 @@ void RawGadgetPassthrough::setEndpoint(AlternateInfo* info, int endpoint, bool e
   EndpointInfo* endpointInfo = &info->mEndpointInfos[endpoint];
   
   if (enable) {
-    PLOG_VERBOSE << "Attempting to enable EP " << std::setfill('0') << std::setw(2) << endpointInfo->usb_endpoint.bEndpointAddress;
+    PLOG_VERBOSE << "Attempting to enable EP " << std::hex << endpointInfo->usb_endpoint.bEndpointAddress;
     endpointInfo->ep_int = usb_raw_ep_enable(endpointInfo->fd, &endpointInfo->usb_endpoint);
     endpointInfo->stop = false;
     endpointInfo->keepRunning = true;
@@ -241,7 +241,7 @@ void RawGadgetPassthrough::setEndpoint(AlternateInfo* info, int endpoint, bool e
       PLOG_VERBOSE << "usb_raw_ep_disable returned " << ret;
       endpointInfo->ep_int = ret;
     }
-  PLOG_VERBOSE << " ---- " << std::setfill('0') << std::setw(2) << endpointInfo->usb_endpoint.bEndpointAddress
+  PLOG_VERBOSE << " ---- " << std::hex << endpointInfo->usb_endpoint.bEndpointAddress
     << " ep_int = " << endpointInfo->ep_int;
 }
 
@@ -545,7 +545,7 @@ void* RawGadgetPassthrough::epLoopThread( void* data ) {
   
   RawGadgetPassthrough* mRawGadgetPassthrough = ep->parent->parent->parent->parent->parent;
 
-  PLOG_VERBOSE << "Starting thread for endpoint " << std::setfill('0') << std::setw(2) << ep->usb_endpoint.bEndpointAddress;
+  PLOG_VERBOSE << "Starting thread for endpoint " << std::hex << ep->usb_endpoint.bEndpointAddress;
   int idleDelay = 1000000;
   int idleCount = 0;
   bool priorenable = false;
@@ -592,14 +592,14 @@ void* RawGadgetPassthrough::epLoopThread( void* data ) {
       idleCount++;
       if (idleCount > 1000000/idleDelay) {
         idleCount = 0;
-        PLOG_VERBOSE << "Idle: Endpoint " << std::setfill('0') << std::setw(2) << ep->usb_endpoint.bEndpointAddress
+        PLOG_VERBOSE << "Idle: Endpoint " << std::hex << ep->usb_endpoint.bEndpointAddress
           << " - ep->busyPackets=" << ep->busyPackets;
       }
       usleep(idleDelay);
     }
   }
   
-  PLOG_VERBOSE << "Terminating thread for endpoint " << std::setfill('0') << std::setw(2) << ep->usb_endpoint.bEndpointAddress;
+  PLOG_VERBOSE << "Terminating thread for endpoint " << std::hex << ep->usb_endpoint.bEndpointAddress;
   return NULL;
 }
 

@@ -28,7 +28,8 @@
 void setEndpoint(AlternateInfo* info, int endpoint, bool enable) {
   EndpointInfo* endpointInfo = &info->mEndpointInfos[endpoint];
   if (enable) {
-    PLOG_VERBOSE << "Attempting to enable EP " << std::setfill('0') << std::setw(2) << endpointInfo->usb_endpoint.bEndpointAddress;
+    PLOG_VERBOSE << "Attempting to enable EP " << std::hex << 
+        endpointInfo->usb_endpoint.bEndpointAddress << std::dec;
     endpointInfo->ep_int = usb_raw_ep_enable(endpointInfo->fd, &endpointInfo->usb_endpoint);
 
     endpointInfo->stop = false;
@@ -45,8 +46,8 @@ void setEndpoint(AlternateInfo* info, int endpoint, bool enable) {
     PLOG_VERBOSE << "usb_raw_ep_disable returns " << ret;
     endpointInfo->ep_int = ret;
   }
-  PLOG_VERBOSE << " ---- " << std::setfill('0') << std::setw(2) << endpointInfo->usb_endpoint.bEndpointAddress
-		<< " ep_int = " << endpointInfo->ep_int;
+  PLOG_VERBOSE << " ---- " << std::hex << endpointInfo->usb_endpoint.bEndpointAddress << 
+    std::dec << " ep_int = " << endpointInfo->ep_int;
 }
 
 void setAlternate(InterfaceInfo* info, int alternate) {
@@ -470,7 +471,8 @@ void ep_out_work_isochronous( EndpointInfo* epInfo ) {
 void* ep_loop_thread( void* data ) {
   EndpointInfo *ep = (EndpointInfo*)data;
   
-  PLOG_VERBOSE << "Starting thread for endpoint " << std::setfill('0') << std::setw(2) << ep->usb_endpoint.bEndpointAddress;
+  PLOG_VERBOSE << "Starting thread for endpoint " << std::hex 
+    << ep->usb_endpoint.bEndpointAddress << std::dec;
   int idleDelay = 1000000;
   int idleCount = 0;
   bool priorenable = false;
@@ -525,14 +527,15 @@ void* ep_loop_thread( void* data ) {
       idleCount++;
       if (idleCount > 1000000/idleDelay) {
         idleCount = 0;
-        PLOG_VERBOSE << "Idle: Endpoint " << std::setfill('0') << std::setw(2) << ep->usb_endpoint.bEndpointAddress
+        PLOG_VERBOSE << "Idle: Endpoint " << std::hex 
+          << ep->usb_endpoint.bEndpointAddress << std::dec 
           << " - ep->busyPackets=" << ep->busyPackets;
       }
       usleep(idleDelay);
     }
   }
   
-  PLOG_VERBOSE << "Terminating thread for endpoint " << std::setfill('0') << std::setw(2) << ep->usb_endpoint.bEndpointAddress;
+  PLOG_VERBOSE << "Terminating thread for endpoint " << std::hex << ep->usb_endpoint.bEndpointAddress << std::dec;
   return NULL;
 }
 
