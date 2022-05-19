@@ -240,8 +240,8 @@ void usb_raw_ep_set_halt(int fd, int ep) {
 // for unknown descriptors: https://elixir.bootlin.com/linux/v5.7/source/include/uapi/linux/usb
 
 void log_control_request(struct usb_ctrlrequest *ctrl) {
-  PLOG_DEBUG << "bRequestType: " << ctrl->bRequestType << " (" <<
-    ((ctrl->bRequestType & USB_DIR_IN) ? "IN" : "OUT") << "), bRequest: 0x" << ctrl->bRequest
+  PLOG_DEBUG << "bRequestType: " << (int) ctrl->bRequestType << " (" <<
+    ((ctrl->bRequestType & USB_DIR_IN) ? "IN" : "OUT") << "), bRequest: 0x" << std::hex << (int) ctrl->bRequest
       << ", wValue: 0x" << std::hex << ctrl->wValue << ", wIndex: 0x" << ctrl->wIndex
       << ", wLength: " << std::dec << ctrl->wLength;
   switch (ctrl->bRequestType & USB_TYPE_MASK) {
@@ -255,7 +255,7 @@ void log_control_request(struct usb_ctrlrequest *ctrl) {
       PLOG_DEBUG << "  type = USB_TYPE_VENDOR";
       break;
     default:
-      PLOG_DEBUG << "  type = unknown = " << (int) ctrl->bRequestType;
+      PLOG_DEBUG << "  type unknown = " << (int) ctrl->bRequestType;
       break;
   }
   
@@ -358,7 +358,7 @@ void log_control_request(struct usb_ctrlrequest *ctrl) {
           PLOG_DEBUG << "  req = USB_REQ_SET_FEATURE";
           break;
         default:
-          PLOG_DEBUG << "  req = unknown = 0x" << std::hex << ctrl->bRequest << std::dec;
+          PLOG_DEBUG << "  unknown req = 0x" << std::hex << (int) ctrl->bRequest << std::dec;
           break;
       }
       break;
@@ -383,12 +383,12 @@ void log_control_request(struct usb_ctrlrequest *ctrl) {
           PLOG_DEBUG << "  req = HID_REQ_SET_PROTOCOL";
           break;
         default:
-          PLOG_DEBUG << "  req = unknown = 0x" << std::hex << ctrl->bRequest << std::dec;
+          PLOG_DEBUG << "  unknown req = 0x" << std::hex << (int) ctrl->bRequest << std::dec;
           break;
       }
       break;
     default:
-      PLOG_DEBUG << "  req = unknown = 0x" << std::hex << ctrl->bRequest << std::dec;
+      PLOG_DEBUG << "  unknown req = 0x" << std::hex << (int) ctrl->bRequest << std::dec;
       break;
   }
 }
