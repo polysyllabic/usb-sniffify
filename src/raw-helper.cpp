@@ -62,14 +62,14 @@ void process_eps_info(EndpointZeroInfo* epZeroInfo) {
   
   int num = usb_raw_eps_info(epZeroInfo->fd, &info);
   for (int i = 0; i < num; i++) {
-    PLOG_VERBOSE << "ep #" << i << ":  name: " << &info.eps[i].name[0] << "  addr: " << info.eps[i].addr;
-    PLOG_VERBOSE << "  type: " << (info.eps[i].caps.type_iso ? "iso " : "___ ") <<
+    PLOG_DEBUG << "ep #" << i << ":  name: " << &info.eps[i].name[0] << "  addr: " << info.eps[i].addr;
+    PLOG_DEBUG << "  type: " << (info.eps[i].caps.type_iso ? "iso " : "___ ") <<
          (info.eps[i].caps.type_bulk ? "blk " : "___ ") <<
          (info.eps[i].caps.type_int ? "int " : "___ ");
-    PLOG_VERBOSE << "  dir : " << (info.eps[i].caps.dir_in ? "in  " : "___ ") <<
+    PLOG_DEBUG << "  dir : " << (info.eps[i].caps.dir_in ? "in  " : "___ ") <<
          (info.eps[i].caps.dir_out ? "out " : "___ ");
-    PLOG_VERBOSE << "  maxpacket_limit: " << info.eps[i].limits.maxpacket_limit;
-    PLOG_VERBOSE << "  max_streams: " << info.eps[i].limits.max_streams;
+    PLOG_DEBUG << "  maxpacket_limit: " << info.eps[i].limits.maxpacket_limit;
+    PLOG_DEBUG << "  max_streams: " << info.eps[i].limits.max_streams;
   }
   
   for (int c = 0; c < epZeroInfo->bNumConfigurations; c++) {
@@ -87,7 +87,7 @@ void process_eps_info(EndpointZeroInfo* epZeroInfo) {
 
           int int_in_addr = usb_endpoint_num(&eInfo->usb_endpoint);
           assert(int_in_addr != 0);
-          PLOG_VERBOSE << "int_in: addr = " << int_in_addr;
+          PLOG_DEBUG << "int_in: addr = " << int_in_addr;
         }
       }
     }
@@ -240,22 +240,22 @@ void usb_raw_ep_set_halt(int fd, int ep) {
 // for unknown descriptors: https://elixir.bootlin.com/linux/v5.7/source/include/uapi/linux/usb
 
 void log_control_request(struct usb_ctrlrequest *ctrl) {
-  PLOG_VERBOSE << "bRequestType: " << ctrl->bRequestType << " (" <<
+  PLOG_DEBUG << "bRequestType: " << ctrl->bRequestType << " (" <<
     ((ctrl->bRequestType & USB_DIR_IN) ? "IN" : "OUT") << "), bRequest: 0x" << ctrl->bRequest
       << ", wValue: 0x" << std::hex << ctrl->wValue << ", wIndex: 0x" << ctrl->wIndex
       << ", wLength: " << std::dec << ctrl->wLength;
   switch (ctrl->bRequestType & USB_TYPE_MASK) {
     case USB_TYPE_STANDARD:
-      PLOG_VERBOSE << "  type = USB_TYPE_STANDARD";
+      PLOG_DEBUG << "  type = USB_TYPE_STANDARD";
       break;
     case USB_TYPE_CLASS:
-      PLOG_VERBOSE << "  type = USB_TYPE_CLASS";
+      PLOG_DEBUG << "  type = USB_TYPE_CLASS";
       break;
     case USB_TYPE_VENDOR:
-      PLOG_VERBOSE << "  type = USB_TYPE_VENDOR";
+      PLOG_DEBUG << "  type = USB_TYPE_VENDOR";
       break;
     default:
-      PLOG_VERBOSE << "  type = unknown = " << (int) ctrl->bRequestType;
+      PLOG_DEBUG << "  type = unknown = " << (int) ctrl->bRequestType;
       break;
   }
   
@@ -263,132 +263,132 @@ void log_control_request(struct usb_ctrlrequest *ctrl) {
     case USB_TYPE_STANDARD:
       switch (ctrl->bRequest) {
         case USB_REQ_GET_DESCRIPTOR:
-          PLOG_VERBOSE << "  req = USB_REQ_GET_DESCRIPTOR";
+          PLOG_DEBUG << "  req = USB_REQ_GET_DESCRIPTOR";
           switch (ctrl->wValue >> 8) {
             case USB_DT_DEVICE:
-              PLOG_VERBOSE << "  desc = USB_DT_DEVICE";
+              PLOG_DEBUG << "  desc = USB_DT_DEVICE";
               break;
             case USB_DT_CONFIG:
-              PLOG_VERBOSE << "  desc = USB_DT_CONFIG";
+              PLOG_DEBUG << "  desc = USB_DT_CONFIG";
               break;
             case USB_DT_STRING:
-              PLOG_VERBOSE << "  desc = USB_DT_STRING";
+              PLOG_DEBUG << "  desc = USB_DT_STRING";
               break;
             case USB_DT_INTERFACE:
-              PLOG_VERBOSE << "  desc = USB_DT_INTERFACE";
+              PLOG_DEBUG << "  desc = USB_DT_INTERFACE";
               break;
             case USB_DT_ENDPOINT:
-              PLOG_VERBOSE << "  desc = USB_DT_ENDPOINT";
+              PLOG_DEBUG << "  desc = USB_DT_ENDPOINT";
               break;
             case USB_DT_DEVICE_QUALIFIER:
-              PLOG_VERBOSE << "  desc = USB_DT_DEVICE_QUALIFIER";
+              PLOG_DEBUG << "  desc = USB_DT_DEVICE_QUALIFIER";
               break;
             case USB_DT_OTHER_SPEED_CONFIG:
-              PLOG_VERBOSE << "  desc = USB_DT_OTHER_SPEED_CONFIG";
+              PLOG_DEBUG << "  desc = USB_DT_OTHER_SPEED_CONFIG";
               break;
             case USB_DT_INTERFACE_POWER:
-              PLOG_VERBOSE << "  desc = USB_DT_INTERFACE_POWER";
+              PLOG_DEBUG << "  desc = USB_DT_INTERFACE_POWER";
               break;
             case USB_DT_OTG:
-              PLOG_VERBOSE << "  desc = USB_DT_OTG";
+              PLOG_DEBUG << "  desc = USB_DT_OTG";
               break;
             case USB_DT_DEBUG:
-              PLOG_VERBOSE << "  desc = USB_DT_DEBUG";
+              PLOG_DEBUG << "  desc = USB_DT_DEBUG";
               break;
             case USB_DT_INTERFACE_ASSOCIATION:
-              PLOG_VERBOSE << "  desc = USB_DT_INTERFACE_ASSOCIATION";
+              PLOG_DEBUG << "  desc = USB_DT_INTERFACE_ASSOCIATION";
               break;
             case USB_DT_SECURITY:
-              PLOG_VERBOSE << "  desc = USB_DT_SECURITY";
+              PLOG_DEBUG << "  desc = USB_DT_SECURITY";
               break;
             case USB_DT_KEY:
-              PLOG_VERBOSE << "  desc = USB_DT_KEY";
+              PLOG_DEBUG << "  desc = USB_DT_KEY";
               break;
             case USB_DT_ENCRYPTION_TYPE:
-              PLOG_VERBOSE << "  desc = USB_DT_ENCRYPTION_TYPE";
+              PLOG_DEBUG << "  desc = USB_DT_ENCRYPTION_TYPE";
               break;
             case USB_DT_BOS:
-              PLOG_VERBOSE << "  desc = USB_DT_BOS";
+              PLOG_DEBUG << "  desc = USB_DT_BOS";
               break;
             case USB_DT_DEVICE_CAPABILITY:
-              PLOG_VERBOSE << "  desc = USB_DT_DEVICE_CAPABILITY";
+              PLOG_DEBUG << "  desc = USB_DT_DEVICE_CAPABILITY";
               break;
             case USB_DT_WIRELESS_ENDPOINT_COMP:
-              PLOG_VERBOSE << "  desc = USB_DT_WIRELESS_ENDPOINT_COMP";
+              PLOG_DEBUG << "  desc = USB_DT_WIRELESS_ENDPOINT_COMP";
               break;
             case USB_DT_PIPE_USAGE:
-              PLOG_VERBOSE << "  desc = USB_DT_PIPE_USAGE";
+              PLOG_DEBUG << "  desc = USB_DT_PIPE_USAGE";
               break;
             case USB_DT_SS_ENDPOINT_COMP:
-              PLOG_VERBOSE << "  desc = USB_DT_SS_ENDPOINT_COMP";
+              PLOG_DEBUG << "  desc = USB_DT_SS_ENDPOINT_COMP";
               break;
             case HID_DT_HID:
-              PLOG_VERBOSE << "  descriptor = HID_DT_HID";
+              PLOG_DEBUG << "  descriptor = HID_DT_HID";
               return;
             case HID_DT_REPORT:
-              PLOG_VERBOSE << "  descriptor = HID_DT_REPORT";
+              PLOG_DEBUG << "  descriptor = HID_DT_REPORT";
               return;
             case HID_DT_PHYSICAL:
-              PLOG_VERBOSE << "  descriptor = HID_DT_PHYSICAL";
+              PLOG_DEBUG << "  descriptor = HID_DT_PHYSICAL";
               return;
             default:
-              PLOG_VERBOSE << "  desc = unknown = 0x" << std::hex << (ctrl->wValue >> 8) << std::dec;
+              PLOG_DEBUG << "  desc = unknown = 0x" << std::hex << (ctrl->wValue >> 8) << std::dec;
               break;
           }
           break;
         case USB_REQ_SET_CONFIGURATION:
-          PLOG_VERBOSE << "  req = USB_REQ_SET_CONFIGURATION";
+          PLOG_DEBUG << "  req = USB_REQ_SET_CONFIGURATION";
           break;
         case USB_REQ_GET_CONFIGURATION:
-          PLOG_VERBOSE << "  req = USB_REQ_GET_CONFIGURATION";
+          PLOG_DEBUG << "  req = USB_REQ_GET_CONFIGURATION";
           break;
         case USB_REQ_SET_INTERFACE:
-          PLOG_VERBOSE << "  req = USB_REQ_SET_INTERFACE";
+          PLOG_DEBUG << "  req = USB_REQ_SET_INTERFACE";
           break;
         case USB_REQ_GET_INTERFACE:
-          PLOG_VERBOSE << "  req = USB_REQ_GET_INTERFACE";
+          PLOG_DEBUG << "  req = USB_REQ_GET_INTERFACE";
           break;
         case USB_REQ_GET_STATUS:
-          PLOG_VERBOSE << "  req = USB_REQ_GET_STATUS";
+          PLOG_DEBUG << "  req = USB_REQ_GET_STATUS";
           break;
         case USB_REQ_CLEAR_FEATURE:
-          PLOG_VERBOSE << "  req = USB_REQ_CLEAR_FEATURE";
+          PLOG_DEBUG << "  req = USB_REQ_CLEAR_FEATURE";
           break;
         case USB_REQ_SET_FEATURE:
-          PLOG_VERBOSE << "  req = USB_REQ_SET_FEATURE";
+          PLOG_DEBUG << "  req = USB_REQ_SET_FEATURE";
           break;
         default:
-          PLOG_VERBOSE << "  req = unknown = 0x" << std::hex << ctrl->bRequest << std::dec;
+          PLOG_DEBUG << "  req = unknown = 0x" << std::hex << ctrl->bRequest << std::dec;
           break;
       }
       break;
     case USB_TYPE_CLASS:
       switch (ctrl->bRequest) {
         case HID_REQ_GET_REPORT:
-          PLOG_VERBOSE << "  req = HID_REQ_GET_REPORT";
+          PLOG_DEBUG << "  req = HID_REQ_GET_REPORT";
           break;
         case HID_REQ_GET_IDLE:
-          PLOG_VERBOSE << "  req = HID_REQ_GET_IDLE";
+          PLOG_DEBUG << "  req = HID_REQ_GET_IDLE";
           break;
         case HID_REQ_GET_PROTOCOL:
-          PLOG_VERBOSE << "  req = HID_REQ_GET_PROTOCOL";
+          PLOG_DEBUG << "  req = HID_REQ_GET_PROTOCOL";
           break;
         case HID_REQ_SET_REPORT:
-          PLOG_VERBOSE << "  req = HID_REQ_SET_REPORT";
+          PLOG_DEBUG << "  req = HID_REQ_SET_REPORT";
           break;
         case HID_REQ_SET_IDLE:
-          PLOG_VERBOSE << "  req = HID_REQ_SET_IDLE";
+          PLOG_DEBUG << "  req = HID_REQ_SET_IDLE";
           break;
         case HID_REQ_SET_PROTOCOL:
-          PLOG_VERBOSE << "  req = HID_REQ_SET_PROTOCOL";
+          PLOG_DEBUG << "  req = HID_REQ_SET_PROTOCOL";
           break;
         default:
-          PLOG_VERBOSE << "  req = unknown = 0x" << std::hex << ctrl->bRequest << std::dec;
+          PLOG_DEBUG << "  req = unknown = 0x" << std::hex << ctrl->bRequest << std::dec;
           break;
       }
       break;
     default:
-      PLOG_VERBOSE << "  req = unknown = 0x" << std::hex << ctrl->bRequest << std::dec;
+      PLOG_DEBUG << "  req = unknown = 0x" << std::hex << ctrl->bRequest << std::dec;
       break;
   }
 }
@@ -396,14 +396,14 @@ void log_control_request(struct usb_ctrlrequest *ctrl) {
 void log_event(struct usb_raw_event *event) {
   switch (event->type) {
   case USB_RAW_EVENT_CONNECT:
-    PLOG_VERBOSE << "event: connect, length: " << std::hex << event->length << std::dec;
+    PLOG_DEBUG << "event: connect, length: " << std::hex << event->length << std::dec;
     break;
   case USB_RAW_EVENT_CONTROL:
-    PLOG_VERBOSE << "event: control, length: " << event->length;
+    PLOG_DEBUG << "event: control, length: " << event->length;
     log_control_request((struct usb_ctrlrequest *)&event->data[0]);
     break;
   default:
-    PLOG_VERBOSE << "event: unknown, length: " << event->length;
+    PLOG_DEBUG << "event: unknown, length: " << event->length;
   }
 }
 

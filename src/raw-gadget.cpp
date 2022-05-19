@@ -28,7 +28,7 @@
 void setEndpoint(AlternateInfo* info, int endpoint, bool enable) {
   EndpointInfo* endpointInfo = &info->mEndpointInfos[endpoint];
   if (enable) {
-    PLOG_VERBOSE << "Attempting to enable EP " << std::hex << 
+    PLOG_DEBUG << "Attempting to enable EP " << std::hex << 
         endpointInfo->usb_endpoint.bEndpointAddress << std::dec;
     endpointInfo->ep_int = usb_raw_ep_enable(endpointInfo->fd, &endpointInfo->usb_endpoint);
 
@@ -41,12 +41,12 @@ void setEndpoint(AlternateInfo* info, int endpoint, bool enable) {
     endpointInfo->keepRunning = false;
     pthread_join(endpointInfo->thread, NULL);
     
-    PLOG_VERBOSE << "Attempting to disable EP with " << temp;
+    PLOG_DEBUG << "Attempting to disable EP with " << temp;
     int ret = usb_raw_ep_disable(endpointInfo->fd, temp);
-    PLOG_VERBOSE << "usb_raw_ep_disable returns " << ret;
+    PLOG_DEBUG << "usb_raw_ep_disable returns " << ret;
     endpointInfo->ep_int = ret;
   }
-  PLOG_VERBOSE << " ---- " << std::hex << endpointInfo->usb_endpoint.bEndpointAddress << 
+  PLOG_DEBUG << " ---- " << std::hex << endpointInfo->usb_endpoint.bEndpointAddress << 
     std::dec << " ep_int = " << endpointInfo->ep_int;
 }
 
@@ -61,14 +61,14 @@ void setAlternate(InterfaceInfo* info, int alternate) {
   if (info->activeAlternate != alternate &&
     info->activeAlternate >= 0 &&
     alternate >= 0) {
-    PLOG_VERBOSE << "Need to disable current Alternate "<< info->activeAlternate;  // TODO;
+    PLOG_DEBUG << "Need to disable current Alternate "<< info->activeAlternate;  // TODO;
     for (int i = 0; i < info->mAlternateInfos[info->activeAlternate].bNumEndpoints; i++) {
-      PLOG_VERBOSE << " - - | setEndpoint(?, " << i << ", " << false;
+      PLOG_DEBUG << " - - | setEndpoint(?, " << i << ", " << false;
       setEndpoint(&info->mAlternateInfos[info->activeAlternate], i, false);
     }
   }
   for (int i = 0; i < alternateInfo->bNumEndpoints; i++) {
-    PLOG_VERBOSE << " - - setEndpoint(?, " << i << ", " << (alternate >= 0 ? "true" : "false") << ")";
+    PLOG_DEBUG << " - - setEndpoint(?, " << i << ", " << (alternate >= 0 ? "true" : "false") << ")";
     setEndpoint(alternateInfo, i, alternate >= 0 ? true : false);
   }
   info->activeAlternate = alternate;
@@ -80,12 +80,12 @@ void setInterface(libusb_device_handle *deviceHandle, ConfigurationInfo* info, i
   if (info->activeInterface != interface &&
     info->activeInterface >= 0 &&
     alternate > 0) {
-    // PLOG_VERBOSE << "Need to disable current Interface of " << info->activeInterface << ", " 
+    // PLOG_DEBUG << "Need to disable current Interface of " << info->activeInterface << ", " 
     //  << info->mInterfaceInfos[info->activeInterface].activeAlternate;
     //setAlternate(&info->mInterfaceInfos[info->activeInterface], -1);
   }
   
-  PLOG_VERBOSE << "setAlternate(?, " << alternate << ")";
+  PLOG_DEBUG << "setAlternate(?, " << alternate << ")";
   setAlternate(interfaceInfo, alternate);
   info->activeInterface = interface;
   if (alternate >= 0) {
@@ -101,14 +101,14 @@ void setConfiguration(EndpointZeroInfo* info, int configuration) {
   if (info->activeConfiguration != configuration &&
     info->activeConfiguration >= 0 &&
     configuration >= 0) {
-    PLOG_VERBOSE << "Need to disable current configuration!";
+    PLOG_DEBUG << "Need to disable current configuration!";
     for (int i = 0; i < info->mConfigurationInfos[info->activeConfiguration].bNumInterfaces; i++) {
       setInterface(info->dev_handle, &info->mConfigurationInfos[info->activeConfiguration], i, -1);  // unsure if this is needed in set config
     }
   }
   
   for (int i = 0; i < configInfo->bNumInterfaces; i++) {
-    PLOG_VERBOSE << "setInterface(?, " << i << ", 0)";
+    PLOG_DEBUG << "setInterface(?, " << i << ", 0)";
     setInterface(info->dev_handle, configInfo, i, 0);  // unsure if this is needed in set config
   }
   info->activeConfiguration = configuration;
@@ -126,7 +126,7 @@ bool ep0_request(EndpointZeroInfo* info, struct usb_raw_control_event *event,
     switch(event->ctrl.bRequest) {
       case USB_REQ_SET_CONFIGURATION:
         // "The lower byte of the wValue field specifies the desired configuration"
-        PLOG_VERBOSE << " - Setting Configuration to: " << (int) (event->ctrl.wValue & 0xff);
+        PLOG_DEBUG << " - Setting Configuration to: " << (int) (event->ctrl.wValue & 0xff);
         
         // From https://usb.ktemkin.com usb_device_framework_chapter.pdf
         // 8. Based on the configuration information and how the USB device will be used, the host
@@ -141,7 +141,7 @@ bool ep0_request(EndpointZeroInfo* info, struct usb_raw_control_event *event,
         usb_raw_configure(info->fd);
       break;
       case USB_REQ_SET_INTERFACE:
-        PLOG_VERBOSE << " - Setting Interface to: " << event->ctrl.wIndex << " Alternate: " <<  event->ctrl.wValue;
+        PLOG_DEBUG << " - Setting Interface to: " << event->ctrl.wIndex << " Alternate: " <<  event->ctrl.wValue;
         setInterface(info->dev_handle, &info->mConfigurationInfos[info->activeConfiguration], event->ctrl.wIndex,  event->ctrl.wValue);
         break;
       default:
@@ -162,7 +162,7 @@ bool ep0_loop(EndpointZeroInfo* info) {
   
   switch (event.inner.type) {
     case USB_RAW_EVENT_CONNECT:
-      PLOG_VERBOSE << "ep0_loop(): Recieved a USB_RAW_EVENT_CONNECT";
+      PLOG_DEBUG << "ep0_loop(): Recieved a USB_RAW_EVENT_CONNECT";
       process_eps_info(info);
       return false;
       break;
@@ -171,7 +171,7 @@ bool ep0_loop(EndpointZeroInfo* info) {
       break;  // continue for processing
       
     default:
-      PLOG_VERBOSE << "ep0_loop(): event.inner.type != USB_RAW_EVENT_CONTROL, event.inner.type = " << event.inner.type;
+      PLOG_DEBUG << "ep0_loop(): event.inner.type != USB_RAW_EVENT_CONTROL, event.inner.type = " << event.inner.type;
       return false;
       break;
   }
@@ -183,7 +183,7 @@ bool ep0_loop(EndpointZeroInfo* info) {
   
   bool reply = ep0_request(info, &event, &io, &done);
   if (!reply) {
-    PLOG_VERBOSE << "ep0: stalling";
+    PLOG_DEBUG << "ep0: stalling";
     usb_raw_ep0_stall(info->fd);
     return false;
   }
@@ -192,7 +192,7 @@ bool ep0_loop(EndpointZeroInfo* info) {
     io.inner.length = event.ctrl.wLength;
   int rv = -1;
   if (event.ctrl.bRequestType & USB_DIR_IN) {
-    PLOG_VERBOSE << "copying " << event.ctrl.wLength << " bytes";    
+    PLOG_DEBUG << "copying " << event.ctrl.wLength << " bytes";    
     rv = libusb_control_transfer(  info->dev_handle,
                   event.ctrl.bRequestType,
                   event.ctrl.bRequest,
@@ -202,18 +202,18 @@ bool ep0_loop(EndpointZeroInfo* info) {
                   event.ctrl.wLength,
                   0);
     if (rv < 0) {
-      PLOG_VERBOSE << "libusb_control_transfer error: " << libusb_error_name(rv);
-      PLOG_VERBOSE << "ep0: stalling";
+      PLOG_DEBUG << "libusb_control_transfer error: " << libusb_error_name(rv);
+      PLOG_DEBUG << "ep0: stalling";
        usb_raw_ep0_stall(info->fd);
       return false;
     }
     
     io.inner.length = rv;
     rv = usb_raw_ep0_write(info->fd, (struct usb_raw_ep_io *)&io);
-    PLOG_VERBOSE << "ep0: transferred " << rv << " bytes (in: DEVICE -> HOST)";
+    PLOG_DEBUG << "ep0: transferred " << rv << " bytes (in: DEVICE -> HOST)";
   } else {
     rv = usb_raw_ep0_read(info->fd, (struct usb_raw_ep_io *)&io);
-    PLOG_VERBOSE << "ep0: transferred " << rv << " bytes (out: HOST -> DEVICE)";
+    PLOG_DEBUG << "ep0: transferred " << rv << " bytes (out: HOST -> DEVICE)";
     
     int r = libusb_control_transfer(  info->dev_handle,
                     event.ctrl.bRequestType,
@@ -228,7 +228,7 @@ bool ep0_loop(EndpointZeroInfo* info) {
       PLOG_ERROR << "ERROR: libusb_control_transfer() returned < 0 in ep0_loop(). r = " << r;
     }
   }
-  PLOG_VERBOSE << "data: " << plog::hexdump(&io.inner.data[0], io.inner.length);
+  PLOG_DEBUG << "data: " << plog::hexdump(&io.inner.data[0], io.inner.length);
   return done;
 }
 
@@ -405,7 +405,7 @@ void ep_in_work_interrupt( EndpointInfo* epInfo ) {
 
 void ep_in_work_isochronous( EndpointInfo* epInfo ) {
   if (epInfo->busyPackets >= 1) {
-    PLOG_VERBOSE << "waiting on packets!";
+    PLOG_DEBUG << "waiting on packets!";
     usleep(epInfo->bIntervalInMicroseconds);
     return;
   }
@@ -471,7 +471,7 @@ void ep_out_work_isochronous( EndpointInfo* epInfo ) {
 void* ep_loop_thread( void* data ) {
   EndpointInfo *ep = (EndpointInfo*)data;
   
-  PLOG_VERBOSE << "Starting thread for endpoint " << std::hex 
+  PLOG_DEBUG << "Starting thread for endpoint " << std::hex 
     << ep->usb_endpoint.bEndpointAddress << std::dec;
   int idleDelay = 1000000;
   int idleCount = 0;
@@ -527,7 +527,7 @@ void* ep_loop_thread( void* data ) {
       idleCount++;
       if (idleCount > 1000000/idleDelay) {
         idleCount = 0;
-        PLOG_VERBOSE << "Idle: Endpoint " << std::hex 
+        PLOG_DEBUG << "Idle: Endpoint " << std::hex 
           << ep->usb_endpoint.bEndpointAddress << std::dec 
           << " - ep->busyPackets=" << ep->busyPackets;
       }
@@ -535,7 +535,7 @@ void* ep_loop_thread( void* data ) {
     }
   }
   
-  PLOG_VERBOSE << "Terminating thread for endpoint " << std::hex << ep->usb_endpoint.bEndpointAddress << std::dec;
+  PLOG_DEBUG << "Terminating thread for endpoint " << std::hex << ep->usb_endpoint.bEndpointAddress << std::dec;
   return NULL;
 }
 
