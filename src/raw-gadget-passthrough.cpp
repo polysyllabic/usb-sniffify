@@ -487,8 +487,9 @@ void* RawGadgetPassthrough::ep0LoopThread( void* rawgadgetobject ) {
   RawGadgetPassthrough* mRawGadgetPassthrough = (RawGadgetPassthrough*) rawgadgetobject;
   
   EndpointZeroInfo* info = &mRawGadgetPassthrough->mEndpointZeroInfo;
-  while(mRawGadgetPassthrough->keepRunning)
-    ep0Loop(mRawGadgetPassthrough);//fd);
+  while(mRawGadgetPassthrough->keepRunning) {
+    ep0Loop(mRawGadgetPassthrough);
+  }
   return NULL;
 }
 
@@ -508,7 +509,6 @@ void* RawGadgetPassthrough::libusbEventHandler( void* rawgadgetobject ) {
   
   // Start ep0 thread afer endpoints, I believe
   PLOG_VERBOSE << "Starting ep0 thread";
-//  pthread_t threadEp0;
   pthread_create(&mRawGadgetPassthrough->threadEp0, NULL, ep0LoopThread, mRawGadgetPassthrough);
   
   struct timeval timeout;

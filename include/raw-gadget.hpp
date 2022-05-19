@@ -5,21 +5,21 @@
 #include "raw-helper.h"
 
 // Functions to help maintain the configuration state:
-void setEndpoint(AlternateInfo* info, int endpoint, bool enable);
-void setAlternate(InterfaceInfo* info, int alternate);
-void setInterface(libusb_device_handle *deviceHandle, ConfigurationInfo* info, int interface, int alternate);
-void setConfiguration(EndpointZeroInfo* info, int configuration);
+//void setEndpoint(AlternateInfo* info, int endpoint, bool enable);
+//void setAlternate(InterfaceInfo* info, int alternate);
+//void setInterface(libusb_device_handle *deviceHandle, ConfigurationInfo* info, int interface, int alternate);
+//void setConfiguration(EndpointZeroInfo* info, int configuration);
 
 //char dummyBuffer[4096];
-bool ep0_request(EndpointZeroInfo* info, struct usb_raw_control_event *event, struct usb_raw_control_io *io, bool *done);
+//bool ep0_request(EndpointZeroInfo* info, struct usb_raw_control_event *event, struct usb_raw_control_io *io, bool *done);
 
-bool ep0_loop(EndpointZeroInfo* info);
-void* ep0_loop_thread( void* data );
+//bool ep0_loop(EndpointZeroInfo* info);
+//void* ep0_loop_thread( void* data );
 
-static void cb_transfer_out(struct libusb_transfer *xfr);
+//static void cb_transfer_out(struct libusb_transfer *xfr);
 void ep_out_work_interrupt( EndpointInfo* epInfo );
 
-static void cb_transfer_in(struct libusb_transfer *xfr);
+//static void cb_transfer_in(struct libusb_transfer *xfr);
 void ep_in_work_interrupt( EndpointInfo* epInfo );
 
 void ep_in_work_isochronous( EndpointInfo* epInfo );
