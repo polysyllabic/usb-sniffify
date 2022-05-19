@@ -396,7 +396,7 @@ void log_control_request(struct usb_ctrlrequest *ctrl) {
 void log_event(struct usb_raw_event *event) {
   switch (event->type) {
   case USB_RAW_EVENT_CONNECT:
-    PLOG_DEBUG << "event: connect, length: " << std::hex << event->length << std::dec;
+    PLOG_DEBUG << "event: connect, length: " << event->length;
     break;
   case USB_RAW_EVENT_CONTROL:
     PLOG_DEBUG << "event: control, length: " << event->length;

@@ -471,8 +471,8 @@ void ep_out_work_isochronous( EndpointInfo* epInfo ) {
 void* ep_loop_thread( void* data ) {
   EndpointInfo *ep = (EndpointInfo*)data;
   
-  PLOG_DEBUG << "Starting thread for endpoint " << std::hex 
-    << ep->usb_endpoint.bEndpointAddress << std::dec;
+  PLOG_DEBUG << "Starting thread for endpoint 0x" << std::hex 
+    << (int) ep->usb_endpoint.bEndpointAddress << std::dec;
   int idleDelay = 1000000;
   int idleCount = 0;
   bool priorenable = false;
@@ -527,15 +527,15 @@ void* ep_loop_thread( void* data ) {
       idleCount++;
       if (idleCount > 1000000/idleDelay) {
         idleCount = 0;
-        PLOG_DEBUG << "Idle: Endpoint " << std::hex 
-          << ep->usb_endpoint.bEndpointAddress << std::dec 
+        PLOG_DEBUG << "Idle: Endpoint 0x" << std::hex 
+          << (int) ep->usb_endpoint.bEndpointAddress << std::dec 
           << " - ep->busyPackets=" << ep->busyPackets;
       }
       usleep(idleDelay);
     }
   }
   
-  PLOG_DEBUG << "Terminating thread for endpoint " << std::hex << ep->usb_endpoint.bEndpointAddress << std::dec;
+  PLOG_DEBUG << "Terminating thread for endpoint 0x" << std::hex << (int) ep->usb_endpoint.bEndpointAddress << std::dec;
   return NULL;
 }
 

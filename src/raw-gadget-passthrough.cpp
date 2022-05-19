@@ -85,13 +85,13 @@ int RawGadgetPassthrough::initialize() {
   PLOG_DEBUG << "Have Device Descriptor!";
   PLOG_DEBUG << " - bLength            : " << (int) deviceDescriptor.bLength;
   PLOG_DEBUG << " - bDescriptorType    : " << (int) deviceDescriptor.bDescriptorType;
-  PLOG_DEBUG << " - bcdUSB             : " << std::hex << (int) deviceDescriptor.bcdUSB;
+  PLOG_DEBUG << " - bcdUSB             : 0x" << std::hex << (int) deviceDescriptor.bcdUSB << std::dec;
   PLOG_DEBUG << " - bDeviceClass       : " << (int) deviceDescriptor.bDeviceClass;
   PLOG_DEBUG << " - bDeviceSubClass    : " << (int) deviceDescriptor.bDeviceSubClass;
   PLOG_DEBUG << " - bDeviceProtocol    : " << (int) deviceDescriptor.bDeviceProtocol;
   PLOG_DEBUG << " - bMaxPacketSize0    : " << (int) deviceDescriptor.bMaxPacketSize0;
-  PLOG_DEBUG << " - idVendor           : " << std::hex << (int) deviceDescriptor.idVendor;
-  PLOG_DEBUG << " - idProduct          : " << std::hex << (int) deviceDescriptor.idProduct;
+  PLOG_DEBUG << " - idVendor           : 0x" << std::hex << (int) deviceDescriptor.idVendor << std::dec;
+  PLOG_DEBUG << " - idProduct          : 0x" << std::hex << (int) deviceDescriptor.idProduct << std::dec;
   PLOG_DEBUG << " - bcdDevice          : " << (int) deviceDescriptor.bcdDevice;
   PLOG_DEBUG << " - iManufacturer      : " << (int) deviceDescriptor.iManufacturer;
   PLOG_DEBUG << " - iProduct           : " << (int) deviceDescriptor.iProduct;
@@ -223,7 +223,7 @@ void RawGadgetPassthrough::setEndpoint(AlternateInfo* info, int endpoint, bool e
   EndpointInfo* endpointInfo = &info->mEndpointInfos[endpoint];
   
   if (enable) {
-    PLOG_DEBUG << "Attempting to enable EP " << std::hex << endpointInfo->usb_endpoint.bEndpointAddress;
+    PLOG_DEBUG << "Attempting to enable EP 0x" << std::hex << (int) endpointInfo->usb_endpoint.bEndpointAddress;
     endpointInfo->ep_int = usb_raw_ep_enable(endpointInfo->fd, &endpointInfo->usb_endpoint);
     endpointInfo->stop = false;
     endpointInfo->keepRunning = true;
@@ -236,12 +236,12 @@ void RawGadgetPassthrough::setEndpoint(AlternateInfo* info, int endpoint, bool e
       endpointInfo->keepRunning = false;
       pthread_join(endpointInfo->thread, NULL);
       
-      PLOG_DEBUG << "Attempting to disable EP with: " << temp;
+      PLOG_DEBUG << "Attempting to disable EP with: 0x" << std::hex << temp << std::dec;
       int ret = usb_raw_ep_disable(endpointInfo->fd, temp);
       PLOG_DEBUG << "usb_raw_ep_disable returned " << ret;
       endpointInfo->ep_int = ret;
     }
-  PLOG_DEBUG << " ---- " << std::hex << endpointInfo->usb_endpoint.bEndpointAddress
+  PLOG_DEBUG << " ---- 0x" << std::hex << (int) endpointInfo->usb_endpoint.bEndpointAddress << std::dec
     << " ep_int = " << endpointInfo->ep_int;
 }
 
@@ -544,7 +544,7 @@ void* RawGadgetPassthrough::epLoopThread( void* data ) {
   
   RawGadgetPassthrough* mRawGadgetPassthrough = ep->parent->parent->parent->parent->parent;
 
-  PLOG_DEBUG << "Starting thread for endpoint " << std::hex << ep->usb_endpoint.bEndpointAddress;
+  PLOG_DEBUG << "Starting thread for endpoint 0x" << std::hex << (int) ep->usb_endpoint.bEndpointAddress;
   int idleDelay = 1000000;
   int idleCount = 0;
   bool priorenable = false;
@@ -591,14 +591,14 @@ void* RawGadgetPassthrough::epLoopThread( void* data ) {
       idleCount++;
       if (idleCount > 1000000/idleDelay) {
         idleCount = 0;
-        PLOG_DEBUG << "Idle: Endpoint " << std::hex << ep->usb_endpoint.bEndpointAddress
+        PLOG_DEBUG << "Idle: Endpoint 0x" << std::hex << (int) ep->usb_endpoint.bEndpointAddress
           << " - ep->busyPackets=" << ep->busyPackets;
       }
       usleep(idleDelay);
     }
   }
   
-  PLOG_DEBUG << "Terminating thread for endpoint " << std::hex << ep->usb_endpoint.bEndpointAddress;
+  PLOG_DEBUG << "Terminating thread for endpoint 0x" << std::hex << (int) ep->usb_endpoint.bEndpointAddress;
   return NULL;
 }
 
