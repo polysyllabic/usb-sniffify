@@ -155,14 +155,14 @@ int RawGadgetPassthrough::initialize() {
         
         alternateInfo->parent = interfaceInfo;
         
-        PLOG_DEBUG << " | - Interface " << interfaceDescriptor->bInterfaceNumber << " Alternate " << a;
+        PLOG_DEBUG << " | - Interface " << (int) interfaceDescriptor->bInterfaceNumber << " Alternate " << a;
         
         r = libusb_claim_interface(deviceHandle, interfaceDescriptor->bInterfaceNumber);
         if(r < 0) {
           PLOG_ERROR << "Cannot claim interface";
           return 1;
         }
-        PLOG_DEBUG << "Claimed Interface " << configDescriptor->interface[i].altsetting->bInterfaceNumber;
+        PLOG_DEBUG << "Claimed Interface " << (int) configDescriptor->interface[i].altsetting->bInterfaceNumber;
         
         totalEndpoints += interfaceDescriptor->bNumEndpoints;
         PLOG_DEBUG << "   - bNumEndpoints      :" << (int) interfaceDescriptor->bNumEndpoints;
@@ -288,7 +288,6 @@ void RawGadgetPassthrough::setInterface( ConfigurationInfo* info, int interface,
 }
 
 void RawGadgetPassthrough::setConfiguration( int configuration) {
-  //ConfigurationInfo* configInfo = &info->mConfigurationInfos[configuration];
   ConfigurationInfo* configInfo = &mEndpointZeroInfo.mConfigurationInfos[configuration];
   
   if (mEndpointZeroInfo.activeConfiguration != configuration &&
