@@ -433,7 +433,7 @@ bool RawGadgetPassthrough::ep0Loop( void* rawgadgetobject) {
     io.inner.length = event.ctrl.wLength;
   int rv = -1;
   if (event.ctrl.bRequestType & USB_DIR_IN) {
-    PLOG_DEBUG << "copying " << event.ctrl.wLength << " bytes\n";
+    PLOG_DEBUG << "copying " << event.ctrl.wLength << " bytes";
 #ifndef FAKE_DATA    
     rv = libusb_control_transfer(info->dev_handle,
               event.ctrl.bRequestType,
