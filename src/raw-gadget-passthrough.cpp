@@ -42,10 +42,10 @@ int RawGadgetPassthrough::initialize() {
   
   int devIndex = -1;
   for (int i = 0; i < deviceCount; i++) {
-    PLOG_VERBOSE << "Device: " << i << " | Bus " << libusb_get_bus_number(devices[i]) << 
-      " Port " << libusb_get_port_number(devices[i]);
+    PLOG_VERBOSE << "Device: " << i << " | Bus " << (int) libusb_get_bus_number(devices[i]) << 
+      " Port " << (int) libusb_get_port_number(devices[i]);
     // Specific for lower USB2 port on rPi 4 with raspbian
-    if (libusb_get_bus_number(devices[i]) == 1 &&  libusb_get_port_number(devices[i]) == 4) {
+    if (libusb_get_bus_number(devices[i]) == 1 && (int) libusb_get_port_number(devices[i]) == 4) {
       devIndex = i;
       PLOG_VERBOSE << " |-- This is the device of interest!\n";
     }
@@ -83,20 +83,20 @@ int RawGadgetPassthrough::initialize() {
   }
 
   PLOG_VERBOSE << "Have Device Descriptor!";
-  PLOG_VERBOSE << " - bLength            : " << deviceDescriptor.bLength;
-  PLOG_VERBOSE << " - bDescriptorType    : " << deviceDescriptor.bDescriptorType;
-  PLOG_VERBOSE << " - bcdUSB             : " << std::hex << deviceDescriptor.bcdUSB;
-  PLOG_VERBOSE << " - bDeviceClass       : " << deviceDescriptor.bDeviceClass;
-  PLOG_VERBOSE << " - bDeviceSubClass    : " << deviceDescriptor.bDeviceSubClass;
-  PLOG_VERBOSE << " - bDeviceProtocol    : " << deviceDescriptor.bDeviceProtocol;
-  PLOG_VERBOSE << " - bMaxPacketSize0    : " << deviceDescriptor.bMaxPacketSize0;
-  PLOG_VERBOSE << " - idVendor           : " << std::hex << deviceDescriptor.idVendor;
-  PLOG_VERBOSE << " - idProduct          : " << std::hex << deviceDescriptor.idProduct;
-  PLOG_VERBOSE << " - bcdDevice          : " << deviceDescriptor.bcdDevice;
-  PLOG_VERBOSE << " - iManufacturer      : " << deviceDescriptor.iManufacturer;
-  PLOG_VERBOSE << " - iProduct           : " << deviceDescriptor.iProduct;
-  PLOG_VERBOSE << " - iSerialNumber      : " << deviceDescriptor.iSerialNumber;
-  PLOG_VERBOSE << " - bNumConfigurations : " << deviceDescriptor.bNumConfigurations;
+  PLOG_VERBOSE << " - bLength            : " << (int) deviceDescriptor.bLength;
+  PLOG_VERBOSE << " - bDescriptorType    : " << (int) deviceDescriptor.bDescriptorType;
+  PLOG_VERBOSE << " - bcdUSB             : " << std::hex << (int) deviceDescriptor.bcdUSB;
+  PLOG_VERBOSE << " - bDeviceClass       : " << (int) deviceDescriptor.bDeviceClass;
+  PLOG_VERBOSE << " - bDeviceSubClass    : " << (int) deviceDescriptor.bDeviceSubClass;
+  PLOG_VERBOSE << " - bDeviceProtocol    : " << (int) deviceDescriptor.bDeviceProtocol;
+  PLOG_VERBOSE << " - bMaxPacketSize0    : " << (int) deviceDescriptor.bMaxPacketSize0;
+  PLOG_VERBOSE << " - idVendor           : " << std::hex << (int) deviceDescriptor.idVendor;
+  PLOG_VERBOSE << " - idProduct          : " << std::hex << (int) deviceDescriptor.idProduct;
+  PLOG_VERBOSE << " - bcdDevice          : " << (int) deviceDescriptor.bcdDevice;
+  PLOG_VERBOSE << " - iManufacturer      : " << (int) deviceDescriptor.iManufacturer;
+  PLOG_VERBOSE << " - iProduct           : " << (int) deviceDescriptor.iProduct;
+  PLOG_VERBOSE << " - iSerialNumber      : " << (int) deviceDescriptor.iSerialNumber;
+  PLOG_VERBOSE << " - bNumConfigurations : " << (int) deviceDescriptor.bNumConfigurations;
   
   vendor = deviceDescriptor.idVendor;
   product = deviceDescriptor.idProduct;
@@ -122,15 +122,15 @@ int RawGadgetPassthrough::initialize() {
     }
 
     PLOG_VERBOSE << "Have Config Descriptor!";
-    PLOG_VERBOSE << " - bLength            : " << configDescriptor->bLength;
-    PLOG_VERBOSE << " - bDescriptorType    : " << configDescriptor->bDescriptorType;
-    PLOG_VERBOSE << " - wTotalLength       : " << configDescriptor->wTotalLength;
-    PLOG_VERBOSE << " - bNumInterfaces     : " << configDescriptor->bNumInterfaces;
-    PLOG_VERBOSE << " - bConfigurationValue: " << configDescriptor->bConfigurationValue;
-    PLOG_VERBOSE << " - iConfiguration     : " << configDescriptor->iConfiguration;
-    PLOG_VERBOSE << " - bmAttributes       : " << configDescriptor->bmAttributes;
-    PLOG_VERBOSE << " - MaxPower           : " << configDescriptor->MaxPower;
-    PLOG_VERBOSE << " - extra_length       : " << configDescriptor->extra_length;
+    PLOG_VERBOSE << " - bLength            : " << (int) configDescriptor->bLength;
+    PLOG_VERBOSE << " - bDescriptorType    : " << (int) configDescriptor->bDescriptorType;
+    PLOG_VERBOSE << " - wTotalLength       : " << (int) configDescriptor->wTotalLength;
+    PLOG_VERBOSE << " - bNumInterfaces     : " << (int) configDescriptor->bNumInterfaces;
+    PLOG_VERBOSE << " - bConfigurationValue: " << (int) configDescriptor->bConfigurationValue;
+    PLOG_VERBOSE << " - iConfiguration     : " << (int) configDescriptor->iConfiguration;
+    PLOG_VERBOSE << " - bmAttributes       : " << (int) configDescriptor->bmAttributes;
+    PLOG_VERBOSE << " - MaxPower           : " << (int) configDescriptor->MaxPower;
+    PLOG_VERBOSE << " - extra_length       : " << (int) configDescriptor->extra_length;
     
     configInfo->activeInterface = -1;
     configInfo->bNumInterfaces = configDescriptor->bNumInterfaces;
@@ -155,7 +155,7 @@ int RawGadgetPassthrough::initialize() {
         
         alternateInfo->parent = interfaceInfo;
         
-        PLOG_VERBOSE << " | - Interface %d Alternate %d\n", interfaceDescriptor->bInterfaceNumber, a;
+        PLOG_VERBOSE << " | - Interface " << interfaceDescriptor->bInterfaceNumber << " Alternate " << a;
         
         r = libusb_claim_interface(deviceHandle, interfaceDescriptor->bInterfaceNumber);
         if(r < 0) {
@@ -165,8 +165,8 @@ int RawGadgetPassthrough::initialize() {
         PLOG_VERBOSE << "Claimed Interface " << configDescriptor->interface[i].altsetting->bInterfaceNumber;
         
         totalEndpoints += interfaceDescriptor->bNumEndpoints;
-        PLOG_VERBOSE << "   - bNumEndpoints      :" << interfaceDescriptor->bNumEndpoints;
-        PLOG_VERBOSE << "   - Endpoints          : \n";
+        PLOG_VERBOSE << "   - bNumEndpoints      :" << (int) interfaceDescriptor->bNumEndpoints;
+        PLOG_VERBOSE << "   - Endpoints          :";
         for (int e = 0; e < interfaceDescriptor->bNumEndpoints; e++) {
           //libusb_set_interface_alt_setting(deviceHandle, i, a );  // no idea how to use this properly, but putting htis here wrok son a PS5 controller
           const struct libusb_endpoint_descriptor *endpointDescriptor = &interfaceDescriptor->endpoint[e];
@@ -191,9 +191,9 @@ int RawGadgetPassthrough::initialize() {
           
           //pthread_create(&endpointThreads[endpoint++], NULL, ep_loop_thread, endpointInfo);
           
-          PLOG_VERBOSE << "   | - bEndpointAddress   : " << std::hex << endpointDescriptor->bEndpointAddress;
-          PLOG_VERBOSE << "     - wMaxPacketSize     : " << endpointDescriptor->wMaxPacketSize;
-          PLOG_VERBOSE << "     - bmAttributes       : " <<  endpointDescriptor->bmAttributes;
+          PLOG_VERBOSE << "   | - bEndpointAddress   : " << std::hex << (int) endpointDescriptor->bEndpointAddress;
+          PLOG_VERBOSE << "     - wMaxPacketSize     : " << (int) endpointDescriptor->wMaxPacketSize;
+          PLOG_VERBOSE << "     - bmAttributes       : " << (int) endpointDescriptor->bmAttributes;
           
           switch (endpointDescriptor->bmAttributes & LIBUSB_TRANSFER_TYPE_MASK) {
             case LIBUSB_TRANSFER_TYPE_CONTROL:
