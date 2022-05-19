@@ -21,7 +21,7 @@ FetchContent_Declare(
 find_package(Threads REQUIRED)
 
 add_library(sniffify  src/raw-helper.cpp
-            #src/raw-gadget.cpp
+            src/raw-gadget.cpp
             src/raw-gadget-passthrough.cpp
             include/raw-gadget.hpp
             include/raw-helper.h)
