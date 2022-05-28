@@ -433,7 +433,7 @@ bool RawGadgetPassthrough::ep0Loop( void* rawgadgetobject) {
     io.inner.length = event.ctrl.wLength;
   int rv = -1;
   if (event.ctrl.bRequestType & USB_DIR_IN) {
-    PLOG_DEBUG << "copying " << event.ctrl.wLength << " bytes";
+    PLOG_VERBOSE << "copying " << event.ctrl.wLength << " bytes";
 #ifndef FAKE_DATA    
     rv = libusb_control_transfer(info->dev_handle,
               event.ctrl.bRequestType,
@@ -454,16 +454,16 @@ bool RawGadgetPassthrough::ep0Loop( void* rawgadgetobject) {
     event.ctrl.bRequestType == 0x80 &&
     event.ctrl.wValue == 0x200 &&
     event.ctrl.wIndex == 0x0 ) {
-    PLOG_DEBUG <<  "FAKING THE DATA!";
+    PLOG_VERBOSE <<  "FAKING THE DATA!";
     memcpy(&io.data[0], nerfedDualshock, event.ctrl.wLength);
     rv = event.ctrl.wLength;
 #endif
     io.inner.length = rv;
     rv = usb_raw_ep0_write(info->fd, (struct usb_raw_ep_io *)&io);
-    PLOG_DEBUG << "ep0: transferred " << rv << " bytes (in: DEVICE -> HOST)";
+    PLOG_VERBOSE << "ep0: transferred " << rv << " bytes (in: DEVICE -> HOST)";
   } else {
     rv = usb_raw_ep0_read(info->fd, (struct usb_raw_ep_io *)&io);
-    PLOG_DEBUG << "ep0: transferred " << rv << " bytes (out: HOST -> DEVICE)";
+    PLOG_VERBOSE << "ep0: transferred " << rv << " bytes (out: HOST -> DEVICE)";
     
     int r = libusb_control_transfer(info->dev_handle,
                     event.ctrl.bRequestType,

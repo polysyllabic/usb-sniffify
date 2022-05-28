@@ -405,7 +405,7 @@ void ep_in_work_interrupt( EndpointInfo* epInfo ) {
 
 void ep_in_work_isochronous( EndpointInfo* epInfo ) {
   if (epInfo->busyPackets >= 1) {
-    PLOG_DEBUG << "waiting on packets!";
+    PLOG_VERBOSE << "waiting on packets!";
     usleep(epInfo->bIntervalInMicroseconds);
     return;
   }
