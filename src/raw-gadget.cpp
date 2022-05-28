@@ -266,7 +266,7 @@ void ep_out_work_interrupt( EndpointInfo* epInfo ) {
       static int errorCount = 0;
       if (errorCount++ > 100) {
         errorCount = 0;
-        PLOG_WARNING << "usb_raw_ep_read() has seen another 100 timeouts";
+        PLOG_VERBOSE << "usb_raw_ep_read() has seen another 100 timeouts";
       }
     }
     usleep(epInfo->bIntervalInMicroseconds);
@@ -442,8 +442,8 @@ void ep_out_work_isochronous( EndpointInfo* epInfo ) {
   static int errorCount = 0;
   int transferred = usb_raw_ep_read(epInfo->fd, (struct usb_raw_ep_io *)&io);
   if (transferred <= 0) {
-    if (errorCount++ % 50) {
-      PLOG_ERROR << "Error count " << errorCount << ": No data available I guess? transferred = " << transferred;
+    if ((++errorCount % 50) == 0) {
+      PLOG_VERBOSE << "Error count " << errorCount << ": No data available I guess? transferred = " << transferred;
     }
     usleep(epInfo->bIntervalInMicroseconds);
     epInfo->busyPackets--;
