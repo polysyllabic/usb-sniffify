@@ -47,7 +47,7 @@ int RawGadgetPassthrough::initialize() {
     // Specific for lower USB2 port on rPi 4 with raspbian
     if (libusb_get_bus_number(devices[i]) == 1 && (int) libusb_get_port_number(devices[i]) == 4) {
       devIndex = i;
-      PLOG_DEBUG << " |-- This is the device of interest!\n";
+      PLOG_DEBUG << " |-- This is the device of interest!";
     }
   }
   if (devIndex < 0) {
