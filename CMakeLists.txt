@@ -30,7 +30,6 @@ target_include_directories(sniffify PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${LIBUSB_INCLUDE_DIRS} 
   ${plog_SOURCE_DIR}/include)
 
-target_compile_definitions(sniffify PRIVATE PLOG_GLOBAL)
 #add_library(sniffifyc EXCLUDE_FROM_ALL src/raw-helper.c
 #            include/raw-helper.h)
 #target_include_directories(sniffifyc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include

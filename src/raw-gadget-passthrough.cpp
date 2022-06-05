@@ -10,18 +10,18 @@
 // The logger will be initialized in the main app. It's safe not to use plog at all. The library
 // will still link correctly and there will simply be no logging.
 #include <plog/Log.h>
-#include <plog/Init.h>
+#include <plog/Initializers/RollingFileInitializer.h>
 #include <plog/Helpers/HexDump.h>
 
 // The initialization below has been hard-coded for a raspberry pi 4. Run the following to discover
 // what the settings are on other systems:
 //     ls /sys/class/udc/
 
-// Initialize the logger. This lets us configure the severity level of the logger for htis library
-// separately from that used by the main program.
+// Initialize the logger from the main application. If this is not called, log messages will go to
+// the main log file.
 extern "C" void __attribute__ ((visibility ("default")))
-initializeSniffifyLog(plog::Severity severity, plog::IAppender* appender) {
-  plog::init(severity, appender);
+initializeSniffifyLog(plog::Severity severity, std::string logname) {
+  plog::init(severity, logname.c_str());
 }
 
 int RawGadgetPassthrough::initialize() {
