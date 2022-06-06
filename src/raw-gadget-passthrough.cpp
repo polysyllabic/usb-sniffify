@@ -10,19 +10,11 @@
 // The logger will be initialized in the main app. It's safe not to use plog at all. The library
 // will still link correctly and there will simply be no logging.
 #include <plog/Log.h>
-#include <plog/Initializers/RollingFileInitializer.h>
 #include <plog/Helpers/HexDump.h>
 
 // The initialization below has been hard-coded for a raspberry pi 4. Run the following to discover
 // what the settings are on other systems:
 //     ls /sys/class/udc/
-
-// Initialize the logger from the main application. If this is not called, log messages will go to
-// the main log file.
-extern "C" void __attribute__ ((visibility ("default")))
-initializeSniffifyLog(plog::Severity severity, std::string logname) {
-  plog::init(severity, logname.c_str());
-}
 
 int RawGadgetPassthrough::initialize() {
   haveProductVendor = false;
@@ -46,16 +38,16 @@ int RawGadgetPassthrough::initialize() {
     PLOG_ERROR << "Could not get libusb device list";
     return 1;
   }
-  PLOG_DEBUG << "Found " << deviceCount << " USB devices.";
+  PLOG_VERBOSE << "Found " << deviceCount << " USB devices.";
   
   int devIndex = -1;
   for (int i = 0; i < deviceCount; i++) {
-    PLOG_DEBUG << "Device: " << i << " | Bus " << (int) libusb_get_bus_number(devices[i]) << 
+    PLOG_VERBOSE << "Device: " << i << " | Bus " << (int) libusb_get_bus_number(devices[i]) << 
       " Port " << (int) libusb_get_port_number(devices[i]);
     // Specific for lower USB2 port on rPi 4 with raspbian
     if (libusb_get_bus_number(devices[i]) == 1 && (int) libusb_get_port_number(devices[i]) == 4) {
       devIndex = i;
-      PLOG_DEBUG << " |-- This is the device of interest!";
+      PLOG_VERBOSE << " |-- This is the device of interest!";
     }
   }
   if (devIndex < 0) {
@@ -67,16 +59,16 @@ int RawGadgetPassthrough::initialize() {
     PLOG_ERROR << "Failed to open libusb device";
     exit(EXIT_FAILURE);
   }
-  PLOG_DEBUG << "USB device has been opened!";
+  PLOG_VERBOSE << "USB device has been opened!";
 
   // Free the list, unref the devices in it
   libusb_free_device_list(devices, 1);
   
    // Find out if kernel driver is attached
   if (libusb_kernel_driver_active(deviceHandle, 0) == 1) {
-    PLOG_DEBUG << "Kernel Driver Active";
+    PLOG_VERBOSE << "Kernel Driver Active";
     if (libusb_detach_kernel_driver(deviceHandle, 0) == 0) {
-      PLOG_DEBUG << "Kernel Driver Detached!";
+      PLOG_VERBOSE << "Kernel Driver Detached!";
     }
   }
   if (libusb_set_auto_detach_kernel_driver(deviceHandle, true) != LIBUSB_SUCCESS) {
@@ -90,21 +82,21 @@ int RawGadgetPassthrough::initialize() {
     exit(EXIT_FAILURE);
   }
 
-  PLOG_DEBUG << "Have Device Descriptor!";
-  PLOG_DEBUG << " - bLength            : " << (int) deviceDescriptor.bLength;
-  PLOG_DEBUG << " - bDescriptorType    : " << (int) deviceDescriptor.bDescriptorType;
-  PLOG_DEBUG << " - bcdUSB             : 0x" << std::hex << (int) deviceDescriptor.bcdUSB << std::dec;
-  PLOG_DEBUG << " - bDeviceClass       : " << (int) deviceDescriptor.bDeviceClass;
-  PLOG_DEBUG << " - bDeviceSubClass    : " << (int) deviceDescriptor.bDeviceSubClass;
-  PLOG_DEBUG << " - bDeviceProtocol    : " << (int) deviceDescriptor.bDeviceProtocol;
-  PLOG_DEBUG << " - bMaxPacketSize0    : " << (int) deviceDescriptor.bMaxPacketSize0;
-  PLOG_DEBUG << " - idVendor           : 0x" << std::hex << (int) deviceDescriptor.idVendor << std::dec;
-  PLOG_DEBUG << " - idProduct          : 0x" << std::hex << (int) deviceDescriptor.idProduct << std::dec;
-  PLOG_DEBUG << " - bcdDevice          : " << (int) deviceDescriptor.bcdDevice;
-  PLOG_DEBUG << " - iManufacturer      : " << (int) deviceDescriptor.iManufacturer;
-  PLOG_DEBUG << " - iProduct           : " << (int) deviceDescriptor.iProduct;
-  PLOG_DEBUG << " - iSerialNumber      : " << (int) deviceDescriptor.iSerialNumber;
-  PLOG_DEBUG << " - bNumConfigurations : " << (int) deviceDescriptor.bNumConfigurations;
+  PLOG_VERBOSE << "Have Device Descriptor!";
+  PLOG_VERBOSE << " - bLength            : " << (int) deviceDescriptor.bLength;
+  PLOG_VERBOSE << " - bDescriptorType    : " << (int) deviceDescriptor.bDescriptorType;
+  PLOG_VERBOSE << " - bcdUSB             : 0x" << std::hex << (int) deviceDescriptor.bcdUSB << std::dec;
+  PLOG_VERBOSE << " - bDeviceClass       : " << (int) deviceDescriptor.bDeviceClass;
+  PLOG_VERBOSE << " - bDeviceSubClass    : " << (int) deviceDescriptor.bDeviceSubClass;
+  PLOG_VERBOSE << " - bDeviceProtocol    : " << (int) deviceDescriptor.bDeviceProtocol;
+  PLOG_VERBOSE << " - bMaxPacketSize0    : " << (int) deviceDescriptor.bMaxPacketSize0;
+  PLOG_VERBOSE << " - idVendor           : 0x" << std::hex << (int) deviceDescriptor.idVendor << std::dec;
+  PLOG_VERBOSE << " - idProduct          : 0x" << std::hex << (int) deviceDescriptor.idProduct << std::dec;
+  PLOG_VERBOSE << " - bcdDevice          : " << (int) deviceDescriptor.bcdDevice;
+  PLOG_VERBOSE << " - iManufacturer      : " << (int) deviceDescriptor.iManufacturer;
+  PLOG_VERBOSE << " - iProduct           : " << (int) deviceDescriptor.iProduct;
+  PLOG_VERBOSE << " - iSerialNumber      : " << (int) deviceDescriptor.iSerialNumber;
+  PLOG_VERBOSE << " - bNumConfigurations : " << (int) deviceDescriptor.bNumConfigurations;
   
   vendor = deviceDescriptor.idVendor;
   product = deviceDescriptor.idProduct;
@@ -129,16 +121,16 @@ int RawGadgetPassthrough::initialize() {
       exit(EXIT_FAILURE);
     }
 
-    PLOG_DEBUG << "Have Config Descriptor!";
-    PLOG_DEBUG << " - bLength            : " << (int) configDescriptor->bLength;
-    PLOG_DEBUG << " - bDescriptorType    : " << (int) configDescriptor->bDescriptorType;
-    PLOG_DEBUG << " - wTotalLength       : " << (int) configDescriptor->wTotalLength;
-    PLOG_DEBUG << " - bNumInterfaces     : " << (int) configDescriptor->bNumInterfaces;
-    PLOG_DEBUG << " - bConfigurationValue: " << (int) configDescriptor->bConfigurationValue;
-    PLOG_DEBUG << " - iConfiguration     : " << (int) configDescriptor->iConfiguration;
-    PLOG_DEBUG << " - bmAttributes       : " << (int) configDescriptor->bmAttributes;
-    PLOG_DEBUG << " - MaxPower           : " << (int) configDescriptor->MaxPower;
-    PLOG_DEBUG << " - extra_length       : " << (int) configDescriptor->extra_length;
+    PLOG_VERBOSE << "Have Config Descriptor!";
+    PLOG_VERBOSE << " - bLength            : " << (int) configDescriptor->bLength;
+    PLOG_VERBOSE << " - bDescriptorType    : " << (int) configDescriptor->bDescriptorType;
+    PLOG_VERBOSE << " - wTotalLength       : " << (int) configDescriptor->wTotalLength;
+    PLOG_VERBOSE << " - bNumInterfaces     : " << (int) configDescriptor->bNumInterfaces;
+    PLOG_VERBOSE << " - bConfigurationValue: " << (int) configDescriptor->bConfigurationValue;
+    PLOG_VERBOSE << " - iConfiguration     : " << (int) configDescriptor->iConfiguration;
+    PLOG_VERBOSE << " - bmAttributes       : " << (int) configDescriptor->bmAttributes;
+    PLOG_VERBOSE << " - MaxPower           : " << (int) configDescriptor->MaxPower;
+    PLOG_VERBOSE << " - extra_length       : " << (int) configDescriptor->extra_length;
     
     configInfo->activeInterface = -1;
     configInfo->bNumInterfaces = configDescriptor->bNumInterfaces;
@@ -163,18 +155,18 @@ int RawGadgetPassthrough::initialize() {
         
         alternateInfo->parent = interfaceInfo;
         
-        PLOG_DEBUG << " | - Interface " << (int) interfaceDescriptor->bInterfaceNumber << " Alternate " << a;
+        PLOG_VERBOSE << " | - Interface " << (int) interfaceDescriptor->bInterfaceNumber << " Alternate " << a;
         
         r = libusb_claim_interface(deviceHandle, interfaceDescriptor->bInterfaceNumber);
         if(r < 0) {
           PLOG_ERROR << "Cannot claim interface";
           return 1;
         }
-        PLOG_DEBUG << "Claimed Interface " << (int) configDescriptor->interface[i].altsetting->bInterfaceNumber;
+        PLOG_VERBOSE << "Claimed Interface " << (int) configDescriptor->interface[i].altsetting->bInterfaceNumber;
         
         totalEndpoints += interfaceDescriptor->bNumEndpoints;
-        PLOG_DEBUG << "   - bNumEndpoints      :" << (int) interfaceDescriptor->bNumEndpoints;
-        PLOG_DEBUG << "   - Endpoints          :";
+        PLOG_VERBOSE << "   - bNumEndpoints      :" << (int) interfaceDescriptor->bNumEndpoints;
+        PLOG_VERBOSE << "   - Endpoints          :";
         for (int e = 0; e < interfaceDescriptor->bNumEndpoints; e++) {
           //libusb_set_interface_alt_setting(deviceHandle, i, a );  // no idea how to use this properly, but putting htis here wrok son a PS5 controller
           const struct libusb_endpoint_descriptor *endpointDescriptor = &interfaceDescriptor->endpoint[e];
@@ -199,22 +191,22 @@ int RawGadgetPassthrough::initialize() {
           
           //pthread_create(&endpointThreads[endpoint++], NULL, ep_loop_thread, endpointInfo);
           
-          PLOG_DEBUG << "   | - bEndpointAddress   : " << std::hex << (int) endpointDescriptor->bEndpointAddress;
-          PLOG_DEBUG << "     - wMaxPacketSize     : " << (int) endpointDescriptor->wMaxPacketSize;
-          PLOG_DEBUG << "     - bmAttributes       : " << (int) endpointDescriptor->bmAttributes;
+          PLOG_VERBOSE << "   | - bEndpointAddress   : " << std::hex << (int) endpointDescriptor->bEndpointAddress;
+          PLOG_VERBOSE << "     - wMaxPacketSize     : " << (int) endpointDescriptor->wMaxPacketSize;
+          PLOG_VERBOSE << "     - bmAttributes       : " << (int) endpointDescriptor->bmAttributes;
           
           switch (endpointDescriptor->bmAttributes & LIBUSB_TRANSFER_TYPE_MASK) {
             case LIBUSB_TRANSFER_TYPE_CONTROL:
-              PLOG_DEBUG << "     | - Control";
+              PLOG_VERBOSE << "     | - Control";
               break;
             case LIBUSB_TRANSFER_TYPE_ISOCHRONOUS:
-              PLOG_DEBUG << "     | - Isochronous";
+              PLOG_VERBOSE << "     | - Isochronous";
               break;
             case LIBUSB_TRANSFER_TYPE_BULK: 
-              PLOG_DEBUG << "     | - Bulk";
+              PLOG_VERBOSE << "     | - Bulk";
               break;
             case LIBUSB_TRANSFER_TYPE_INTERRUPT:
-              PLOG_DEBUG << "     | - Interrupt";
+              PLOG_VERBOSE << "     | - Interrupt";
               break;
             default:
               break;
@@ -231,7 +223,7 @@ void RawGadgetPassthrough::setEndpoint(AlternateInfo* info, int endpoint, bool e
   EndpointInfo* endpointInfo = &info->mEndpointInfos[endpoint];
   
   if (enable) {
-    PLOG_DEBUG << "Attempting to enable EP 0x" << std::hex << (int) endpointInfo->usb_endpoint.bEndpointAddress;
+    PLOG_VERBOSE << "Attempting to enable EP 0x" << std::hex << (int) endpointInfo->usb_endpoint.bEndpointAddress;
     endpointInfo->ep_int = usb_raw_ep_enable(endpointInfo->fd, &endpointInfo->usb_endpoint);
     endpointInfo->stop = false;
     endpointInfo->keepRunning = true;
@@ -244,12 +236,12 @@ void RawGadgetPassthrough::setEndpoint(AlternateInfo* info, int endpoint, bool e
       endpointInfo->keepRunning = false;
       pthread_join(endpointInfo->thread, NULL);
       
-      PLOG_DEBUG << "Attempting to disable EP with: 0x" << std::hex << temp << std::dec;
+      PLOG_VERBOSE << "Attempting to disable EP with: 0x" << std::hex << temp << std::dec;
       int ret = usb_raw_ep_disable(endpointInfo->fd, temp);
-      PLOG_DEBUG << "usb_raw_ep_disable returned " << ret;
+      PLOG_VERBOSE << "usb_raw_ep_disable returned " << ret;
       endpointInfo->ep_int = ret;
     }
-  PLOG_DEBUG << " ---- 0x" << std::hex << (int) endpointInfo->usb_endpoint.bEndpointAddress << std::dec
+  PLOG_VERBOSE << " ---- 0x" << std::hex << (int) endpointInfo->usb_endpoint.bEndpointAddress << std::dec
     << " ep_int = " << endpointInfo->ep_int;
 }
 
@@ -264,14 +256,14 @@ void RawGadgetPassthrough::setAlternate(InterfaceInfo* info, int alternate) {
   if (info->activeAlternate != alternate &&
     info->activeAlternate >= 0 &&
     alternate >= 0) {
-    PLOG_DEBUG << "Need to disable current Alternate " << info->activeAlternate;  // TODO;
+    PLOG_VERBOSE << "Need to disable current Alternate " << info->activeAlternate;  // TODO;
     for (int i = 0; i < info->mAlternateInfos[info->activeAlternate].bNumEndpoints; i++) {
-      PLOG_DEBUG << " - - | setEndpoint(?, " << i << ", false)";
+      PLOG_VERBOSE << " - - | setEndpoint(?, " << i << ", false)";
       this->setEndpoint(&info->mAlternateInfos[info->activeAlternate], i, false);
     }
   }
   for (int i = 0; i < alternateInfo->bNumEndpoints; i++) {
-    PLOG_DEBUG << " - - | setEndpoint(?, " << i << ", " << (alternate >= 0 ? "true" : "false") << ")";
+    PLOG_VERBOSE << " - - | setEndpoint(?, " << i << ", " << (alternate >= 0 ? "true" : "false") << ")";
     this->setEndpoint(alternateInfo, i, alternate >= 0 ? true : false);
   }
   info->activeAlternate = alternate;
@@ -281,11 +273,11 @@ void RawGadgetPassthrough::setInterface( ConfigurationInfo* info, int interface,
   InterfaceInfo* interfaceInfo = &info->mInterfaceInfos[interface];
   
   if (info->activeInterface != interface &&  info->activeInterface >= 0 &&  alternate > 0) {
-    //PLOG_DEBUG << "Need to disable current Interface of " << info->activeInterface << "," << info->mInterfaceInfos[info->activeInterface].activeAlternate;
+    //PLOG_VERBOSE << "Need to disable current Interface of " << info->activeInterface << "," << info->mInterfaceInfos[info->activeInterface].activeAlternate;
     //setAlternate(&info->mInterfaceInfos[info->activeInterface], -1);
   }
   
-  PLOG_DEBUG << "setAlternate(?, " << alternate << ")";
+  PLOG_VERBOSE << "setAlternate(?, " << alternate << ")";
   this->setAlternate(interfaceInfo, alternate);
   info->activeInterface = interface;
   if (alternate >= 0) {
@@ -301,14 +293,14 @@ void RawGadgetPassthrough::setConfiguration( int configuration) {
   if (mEndpointZeroInfo.activeConfiguration != configuration &&
     mEndpointZeroInfo.activeConfiguration >= 0 &&
     configuration >= 0) {
-    PLOG_DEBUG << "Need to disable current configuration!";
+    PLOG_VERBOSE << "Need to disable current configuration!";
     for (int i = 0; i < mEndpointZeroInfo.mConfigurationInfos[mEndpointZeroInfo.activeConfiguration].bNumInterfaces; i++) {
       this->setInterface( &mEndpointZeroInfo.mConfigurationInfos[mEndpointZeroInfo.activeConfiguration], i, -1);  // unsure if this is needed in set config
     }
   }
   
   for (int i = 0; i < configInfo->bNumInterfaces; i++) {
-    PLOG_DEBUG << "setInterface(?, " << i << ", 0)";
+    PLOG_VERBOSE << "setInterface(?, " << i << ", 0)";
     this->setInterface(configInfo, i, 0);  // unsure if this is needed in set config
   }
   mEndpointZeroInfo.activeConfiguration = configuration;
@@ -326,7 +318,7 @@ bool RawGadgetPassthrough::ep0Request(RawGadgetPassthrough* mRawGadgetPassthroug
     switch(event->ctrl.bRequest) {
       case USB_REQ_SET_CONFIGURATION:
         // The lower byte of the wValue field specifies the desired configuration
-        PLOG_DEBUG << "Setting configuration to: " << (int) (event->ctrl.wValue & 0xff);
+        PLOG_VERBOSE << "Setting configuration to: " << (int) (event->ctrl.wValue & 0xff);
         
         // From https://usb.ktemkin.com usb_device_framework_chapter.pdf
         // 8. Based on the configuration information and how the USB device will be used, the host
@@ -341,7 +333,7 @@ bool RawGadgetPassthrough::ep0Request(RawGadgetPassthrough* mRawGadgetPassthroug
         usb_raw_configure(info->fd);
         break;
       case USB_REQ_SET_INTERFACE:
-        PLOG_DEBUG << "Setting Interface to: " << event->ctrl.wIndex << " Alternate: " <<  event->ctrl.wValue;
+        PLOG_VERBOSE << "Setting Interface to: " << event->ctrl.wIndex << " Alternate: " <<  event->ctrl.wValue;
         mRawGadgetPassthrough->setInterface(&info->mConfigurationInfos[info->activeConfiguration], event->ctrl.wIndex,  event->ctrl.wValue);
         break;
       default:
@@ -411,7 +403,7 @@ bool RawGadgetPassthrough::ep0Loop( void* rawgadgetobject) {
   
   switch (event.inner.type) {
     case USB_RAW_EVENT_CONNECT:
-      PLOG_DEBUG << "ep0Loop(): Recieved a USB_RAW_EVENT_CONNECT";
+      PLOG_VERBOSE << "ep0Loop(): Recieved a USB_RAW_EVENT_CONNECT";
       process_eps_info(info);
       return false;
       break;
@@ -486,7 +478,7 @@ bool RawGadgetPassthrough::ep0Loop( void* rawgadgetobject) {
       PLOG_ERROR << "libusb_control_transfer() returned < 0 in ep0Loop(). r = " << r;
     }
   }
-  PLOG_DEBUG << "data: " << plog::hexdump(&io.inner.data[0], io.inner.length);
+  PLOG_VERBOSE << "data: " << plog::hexdump(&io.inner.data[0], io.inner.length);
   return done;
 }
 
@@ -510,12 +502,12 @@ void* RawGadgetPassthrough::libusbEventHandler( void* rawgadgetobject ) {
   const char *driver = "fe980000.usb";//dummy_udc";
   
   // raw-gadget fun
-  PLOG_DEBUG << "Starting raw-gadget";
+  PLOG_VERBOSE << "Starting raw-gadget";
   usb_raw_init(mRawGadgetPassthrough->fd, USB_SPEED_HIGH, driver, device);
   usb_raw_run(mRawGadgetPassthrough->fd);
   
   // Start ep0 thread afer endpoints, I believe
-  PLOG_DEBUG << "Starting ep0 thread";
+  PLOG_VERBOSE << "Starting ep0 thread";
   pthread_create(&mRawGadgetPassthrough->threadEp0, NULL, ep0LoopThread, mRawGadgetPassthrough);
   
   struct timeval timeout;
@@ -535,7 +527,7 @@ void* RawGadgetPassthrough::libusbEventHandler( void* rawgadgetobject ) {
 void RawGadgetPassthrough::start() {
   keepRunning = true;
   
-  PLOG_DEBUG << "Starting libusb Event Thread";
+  PLOG_VERBOSE << "Starting libusb Event Thread";
   pthread_create(&libusbEventThread, NULL, libusbEventHandler, this);
 }
 
@@ -552,7 +544,7 @@ void* RawGadgetPassthrough::epLoopThread( void* data ) {
   
   RawGadgetPassthrough* mRawGadgetPassthrough = ep->parent->parent->parent->parent->parent;
 
-  PLOG_DEBUG << "Starting thread for endpoint 0x" << std::hex << (int) ep->usb_endpoint.bEndpointAddress;
+  PLOG_VERBOSE << "Starting thread for endpoint 0x" << std::hex << (int) ep->usb_endpoint.bEndpointAddress;
   int idleDelay = 1000000;
   int idleCount = 0;
   bool priorenable = false;
@@ -599,14 +591,14 @@ void* RawGadgetPassthrough::epLoopThread( void* data ) {
       idleCount++;
       if (idleCount > 1000000/idleDelay) {
         idleCount = 0;
-        PLOG_DEBUG << "Idle: Endpoint 0x" << std::hex << (int) ep->usb_endpoint.bEndpointAddress
+        PLOG_VERBOSE << "Idle: Endpoint 0x" << std::hex << (int) ep->usb_endpoint.bEndpointAddress
           << " - ep->busyPackets=" << ep->busyPackets;
       }
       usleep(idleDelay);
     }
   }
   
-  PLOG_DEBUG << "Terminating thread for endpoint 0x" << std::hex << (int) ep->usb_endpoint.bEndpointAddress;
+  PLOG_VERBOSE << "Terminating thread for endpoint 0x" << std::hex << (int) ep->usb_endpoint.bEndpointAddress;
   return NULL;
 }
 
