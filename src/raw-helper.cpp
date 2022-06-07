@@ -177,8 +177,8 @@ int usb_raw_ep_read(int fd, struct usb_raw_ep_io *io) {
     if(errno == ETIMEDOUT ) {
       return rv;
     }
-    PLOG_FATAL << "ioctl(USB_RAW_IOCTL_EP_READ): " << strerror(errno);
-    exit(EXIT_FAILURE);
+    PLOG_ERROR << "ioctl(USB_RAW_IOCTL_EP_READ): " << strerror(errno);
+    // exit(EXIT_FAILURE);
   }
   return rv;
 }
